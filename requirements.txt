@@ -1,0 +1,5 @@
+impacket
+chardet
+lxml
+termcolor
+setuptools

@@ -1,0 +1,26 @@
+<Trigger>
+    <Guid>KiU1sn0udUu60yVgJR65IQ==</Guid>
+    <Name>export</Name>
+    <TurnOffAfterAction>true</TurnOffAfterAction>
+    <Events>
+        <Event>
+            <TypeGuid>bES7XfGLTA2IzmXm6a0pig==</TypeGuid>
+            <Parameters>
+                <Parameter>1</Parameter>
+                <Parameter>False</Parameter>
+            </Parameters>
+        </Event>
+    </Events>
+    <Conditions />
+    <Actions>
+        <Action>
+            <TypeGuid>D5prW87VRr65NO2xP5RIIg==</TypeGuid>
+            <Parameters>
+                <Parameter>%appdata%\export.xml</Parameter>
+                <Parameter>KeePass XML (2.x)</Parameter>
+                <Parameter />
+                <Parameter />
+            </Parameters>
+        </Action>
+    </Actions>
+</Trigger>
