@@ -7,10 +7,10 @@
 
 ## Features & Roadmap
 
->  *KeePwn is still in early development and not fully tested yet : please use it with caution and always try it in a lab before (legally) attacking real-life targets!*
+>  *KeePwn is still in early development and not fully tested yet: please use it with caution and always try it in a lab before (legally) attacking real-life targets!*
 
 - [x] KeePass Discovery
-  - [x] Accept multiple target sources (IP, range, hostname, file)
+  - [x] Accept multiple target sources (IP, range, hostname, file).
   - [x] Automatically look for KeePass global installation files via SMB C$ share.
   - [ ] Automatically look for KeePass portable + Windows store installation files via SMB C$ share.
   - [ ] Automatically check for running KeePass process through Impacket-based command execution.
@@ -23,13 +23,13 @@
   - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
 - [ ] KeePass DLL Injection
   - [ ] Generate ready-to-inject shellcode to ease DLL injection, see [KeeFarce Reborn](https://github.com/d3lb3/KeeFarceReborn).
-  - [ ] Generate ready-to-use Python shellcode injector, à la [Pyramid](https://github.com/naksyn/Pyramid)
+  - [ ] Generate ready-to-use Python shellcode injector, à la [Pyramid](https://github.com/naksyn/Pyramid).
 - [x] Authentication
   - [x] Support LM/NT hash authentication.
   - [ ] Support Kerberos Authentication.
 - [ ] Miscellaneous
   - [ ] Write unit tests.
-  - [ ] Make the project available on [PyPI](https://pypi.org/) 
+  - [ ] Make the project available on PyPI. 
 
 
 ## Installation
@@ -70,16 +70,16 @@ As described in @harmj0y's [blog post (*Exfiltration Without Malware* part)](htt
 
   ![](./.github/images/keepwn_trigger_add_example.png)
 
-- Poll %APPDATA% for exports and automatically moves it from remote host to local.
+- Poll %APPDATA% for exports and automatically moves it from remote host to the current directory.
 
   ![](./.github/images/keepwn_trigger_poll_example.png)
 
 Once again, these actions are made through SMB C$ share access, limiting antiviral detection as no command execution is performed.
 
-If no configuration file path is specified, note that KeePwn will try to find it manually by looking in default locations. As KeePass trigger manipulation should always be added with caution, the mode is limited to 1 host and 1 configuration file at a time. Feel free to let me know if you think of a use case that would need more than that (massive trigger abuse on a whole network?). 
+If no configuration file path is specified, note that KeePwn will try to find it manually by looking in default locations (shown in the 'check' example). As KeePass trigger manipulation should always be performed with caution, this mode is limited to 1 host and 1 configuration file at a time. Feel free to let me know if you think of a use case that would need more than that (massive trigger abuse on a whole network?). 
 
 ## Contribute
 
-Pull requests are welcome (see: Roadpmap + TODO in code).
+Pull requests are welcome (see: roadmap above + TODO* in code).
 
-Feel free to open an issue or DM me on Twitter to suggest improvement.
+Feel free to open an issue or DM [@d3lb3_](https://twitter.com/d3lb3_)  on Twitter to suggest improvement.
