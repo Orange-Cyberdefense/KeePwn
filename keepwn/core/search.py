@@ -1,17 +1,40 @@
+import os
+
 from datetime import datetime
 
 from impacket.smbconnection import SessionError
 
-from keepwn.utils.logging import print_found_keepass, print_not_found_keepass, print_error_target
+from keepwn.utils.logging import (
+    print_found_keepass, 
+    print_not_found_keepass, 
+    print_error_target,
+    print_found_cache,
+    print_not_found_cache
+)
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 
+
+def _search_plugin_cache(smb_connection, target, share, user_dirname):
+    def _filter_is_dir(elm):
+        return (elm.is_directory() and 
+            elm.get_longname() not in [".", ".."])
+
+    path = '\\Users\\{}\\AppData\\Local\\KeePass\\PluginCache\\*'.format(user_dirname)
+    cache_folders = [
+            os.path.join('\\\\{}{}'.format(share, path[:-1]), elm.get_longname())
+        for elm in filter(_filter_is_dir, smb_connection.listPath(share, path))
+    ]
+
+    if cache_folders:
+        print_found_cache(target, cache_folders)
+    else:
+        print_not_found_cache(target)
 
 def search(options):
 
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     for target in targets:
-
         smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
         if error or not smb_connection:
             # here only because printing is different for multiple targets (search) vs. single target (trigger)
@@ -59,6 +82,10 @@ def search(options):
             for file in smb_connection.listPath(share, '\\Users\\*'):
                 if file.is_directory():
                     try:
+                        # Looking for plugin cache folders
+                        _search_plugin_cache(smb_connection, target, share, file.get_longname())
+
+                        # Looking for configuration file
                         path = '\\Users\\{}\\AppData\\Roaming\\KeePass\\KeePass.config.xml'.format(file.get_longname())
                         for file in smb_connection.listPath(share, path):
                             last_access_date = datetime.fromtimestamp((float(file.get_atime_epoch())))
@@ -74,8 +101,9 @@ def search(options):
                                 else:
                                     last_access_message = '{} minutes ago'.format((difference.seconds // 60) % 60)
                             print_found_keepass(target, '\\\\{}{}'.format(share, path), last_access_message, highlight_priority)
-
                     except SessionError as e:
                         pass  # the file was not found
+
         except SessionError as e:
             pass  # the file was not found
+        

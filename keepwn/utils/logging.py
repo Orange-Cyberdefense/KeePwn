@@ -53,6 +53,30 @@ def print_alert_target(target, string):
     cprint("]", attrs=["bold"], end=" ")
     print(string)
 
+def print_found_cache(target, folders_list):
+    cprint("[", attrs=["bold"], end="")
+    cprint(target, "green", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    cprint("Found plugin cache folder:", end="\n")
+
+    for folder in folders_list:
+        cprint("[", attrs=["bold"], end="")
+        cprint(target, "green", attrs=["bold"], end="")
+        cprint("]", attrs=["bold"], end=" ")
+        cprint("\t", end="")
+        cprint("[", attrs=["bold"], end="")
+        cprint("!", "yellow", attrs=["bold"], end="")
+        cprint("]", attrs=["bold"], end=" ")
+        cprint("'{}'".format(folder), "blue")
+#        cprint("\t\t[*] {}".format(folder), "blue")
+
+def print_not_found_cache(target):
+    cprint("[", attrs=["bold"], end="")
+    cprint(target, "grey", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    cprint("No plugin cache folder found")
+
+
 def print_found_keepass(target, path, last_access_message, highlight_priority):
     cprint("[", attrs=["bold"], end="")
     cprint(target, "green", attrs=["bold"], end="")
