@@ -15,6 +15,7 @@
   - [ ] Automatically look for KeePass portable + Windows store installation files via SMB C$ share.
   - [ ] Automatically check for running KeePass process through Impacket-based command execution.
   - [ ] Multi-thread implementation to avoid bottleneck hosts.
+  - [x] Automatically look for KeePass plugin cache folder.
 - [x] KeePass Trigger Abuse
   - [x] Add and remove triggers from KeePass configuration file via SMB C$ share.
   - [x] Automatically poll for cleartext exports on the remote host.
