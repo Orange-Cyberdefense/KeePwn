@@ -15,15 +15,16 @@
   - [ ] Automatically look for KeePass portable + Windows store installation files via SMB C$ share.
   - [ ] Automatically check for running KeePass process through Impacket-based command execution.
   - [ ] Multi-thread implementation to avoid bottleneck hosts.
+  - [x] Automatically check for KeePass binary's metadata (version, last access time).
 - [x] KeePass Trigger Abuse
   - [x] Add and remove triggers from KeePass configuration file via SMB C$ share.
   - [x] Automatically poll for cleartext exports on the remote host.
   - [ ] Customize triggers with command line arguments.
 - [ ] KeePass Cracking
   - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
-- [ ] KeePass DLL Injection
-  - [ ] Generate ready-to-inject shellcode to ease DLL injection, see [KeeFarce Reborn](https://github.com/d3lb3/KeeFarceReborn).
-  - [ ] Generate ready-to-use Python shellcode injector, à la [Pyramid](https://github.com/naksyn/Pyramid)
+- [ ] KeePass Plugin Abuse
+  - [ ] Automatically upload a plugin (DLL or PFX format) to extract passwords, see [KeeFarce Reborn](https://github.com/d3lb3/KeeFarceReborn).
+  - [ ] Automatically poll for cleartext exports on the remote host.
 - [x] Authentication
   - [x] Support LM/NT hash authentication.
   - [ ] Support Kerberos Authentication.

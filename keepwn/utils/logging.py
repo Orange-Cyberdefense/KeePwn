@@ -53,20 +53,32 @@ def print_alert_target(target, string):
     cprint("]", attrs=["bold"], end=" ")
     print(string)
 
-def print_found_keepass(target, path, last_access_message, highlight_priority):
+def print_found_keepass(target, path, version, time_difference):
+    last_access_message = '{} days ago'.format(time_difference.days)
+    if time_difference.days == 0:
+        if time_difference.seconds // 3600 > 0:
+            last_access_message = '{} hours ago'.format(time_difference.seconds // 3600)
+        else:
+            last_access_message = '{} minutes ago'.format((time_difference.seconds // 60) % 60)
+    version = '.'.join(version.split('.')[0:3])
     cprint("[", attrs=["bold"], end="")
     cprint(target, "green", attrs=["bold"], end="")
     cprint("]", attrs=["bold"], end=" ")
     cprint("Found ", end="")
     cprint("'{}'".format(path), "blue", end="")
-    cprint(" (LastAccessTime:", "cyan", end=" ")
-    if highlight_priority == 'LOW':
-        cprint(last_access_message, "yellow", end="")
-    elif highlight_priority == 'MEDIUM':
-        cprint(last_access_message, "yellow", attrs=["bold"], end="")
-    elif highlight_priority == 'HIGH':
-        cprint(last_access_message, "yellow", "on_red", attrs=["bold"], end="")
+    cprint(" (Version:", "cyan", end=" ")
+    cprint(version, "yellow", end="")
+    print(", ", end=" ")
+    cprint("LastAccessTime:", "cyan", end=" ")
+    cprint(last_access_message, "yellow", end="")
     cprint(")", "cyan")
+
+def print_found_keepass_xml(target, path):
+    cprint("[", attrs=["bold"], end="")
+    cprint(target, "green", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    cprint("Found ", end="")
+    cprint("'{}'".format(path), "blue")
 
 def print_not_found_keepass(target):
     cprint("[", attrs=["bold"], end="")

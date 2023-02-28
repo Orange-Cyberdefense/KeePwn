@@ -1,8 +1,12 @@
+import mmap
 from datetime import datetime
+from io import BytesIO
 
+import pefile
 from impacket.smbconnection import SessionError
 
-from keepwn.utils.logging import print_found_keepass, print_not_found_keepass, print_error_target
+from keepwn.utils.logging import print_found_keepass, print_not_found_keepass, print_error_target, \
+    print_found_keepass_xml
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 
@@ -39,19 +43,18 @@ def search(options):
         try:
             path = '\\Program Files\\KeePass Password Safe 2\\KeePass.exe'
             for file in smb_connection.listPath(share, path):
+                # get last access date
+                file.get_attributes()
                 last_access_date = datetime.fromtimestamp((float(file.get_atime_epoch())))
                 difference = datetime.now() - last_access_date
-                last_access_message = '{} days ago'.format(difference.days)
-                highlight_priority = 'LOW'
-                #if difference.days >= 7:
-                    # highlight_priority = 'MEDIUM'
-                if difference.days == 0:
-                    # highlight_priority = 'HIGH'
-                    if difference.seconds // 3600 > 0:
-                        last_access_message = '{} hours ago'.format(difference.seconds // 3600)
-                    else:
-                        last_access_message = '{} minutes ago'.format((difference.seconds//60)%60)
-                print_found_keepass(target, '\\\\{}{}'.format(share, path), last_access_message, highlight_priority)
+                # get keepass version (we download KeePass.exe and parse the binary content)
+                buffer = BytesIO()
+                smb_connection.getFile(share, path, buffer.write)
+                pe = pefile.PE(data=buffer.getvalue())
+                enum_dict = pe.dump_dict()
+                version = enum_dict['Version Information'][0][2][11][b'ProductVersion'].decode("utf-8")
+                # display
+                print_found_keepass(target, '\\\\{}{}'.format(share, path), version, difference)
         except SessionError:
             print_not_found_keepass(target)
 
@@ -61,19 +64,7 @@ def search(options):
                     try:
                         path = '\\Users\\{}\\AppData\\Roaming\\KeePass\\KeePass.config.xml'.format(file.get_longname())
                         for file in smb_connection.listPath(share, path):
-                            last_access_date = datetime.fromtimestamp((float(file.get_atime_epoch())))
-                            difference = datetime.now() - last_access_date
-                            last_access_message = '{} days ago'.format(difference.days)
-                            highlight_priority = 'LOW'
-                            # if difference.days >= 7:
-                            # highlight_priority = 'MEDIUM'
-                            if difference.days == 0:
-                                # highlight_priority = 'HIGH'
-                                if difference.seconds // 3600 > 0:
-                                    last_access_message = '{} hours ago'.format(difference.seconds // 3600)
-                                else:
-                                    last_access_message = '{} minutes ago'.format((difference.seconds // 60) % 60)
-                            print_found_keepass(target, '\\\\{}{}'.format(share, path), last_access_message, highlight_priority)
+                            print_found_keepass_xml(target, '\\\\{}{}'.format(share, path))
 
                     except SessionError as e:
                         pass  # the file was not found
