@@ -1,5 +1,6 @@
+from keepwn.core.plugin import check_plugin, add_plugin, clean_plugin, poll_plugin
 from keepwn.core.search import search
-from keepwn.core.trigger import check, add, clean, poll
+from keepwn.core.trigger import check_trigger, add_trigger, clean_trigger, poll_trigger
 from keepwn.utils.parser import parse_args
 
 
@@ -14,13 +15,22 @@ def main():
         search(options)
     if options.mode == 'trigger':
         if options.trigger_mode == 'check':
-            check(options)
+            check_trigger(options)
         if options.trigger_mode == 'add':
-            add(options)
+            add_trigger(options)
         if options.trigger_mode == 'remove':
-            clean(options)
+            clean_trigger(options)
         if options.trigger_mode == 'poll':
-            poll(options)
+            poll_trigger(options)
+    if options.mode == 'plugin':
+        if options.plugin_mode == 'check':
+            check_plugin(options)
+        if options.plugin_mode == 'add':
+            add_plugin(options)
+        if options.plugin_mode == 'remove':
+            clean_plugin(options)
+        if options.plugin_mode == 'poll':
+            poll_plugin(options)
 
 if __name__ == '__main__':
     main()

@@ -86,6 +86,42 @@ def print_not_found_keepass(target):
     cprint("]", attrs=["bold"], end=" ")
     cprint("No KeePass-related file found")
 
+def print_found_plugin_directory(path):
+    cprint("[", attrs=["bold"], end="")
+    cprint("*", "blue", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    print("Found KeePass Plugins directory ", end=" ")
+    cprint("'{}'".format(path), "blue")
+
+def print_found_plugins(plugins):
+    cprint("[", attrs=["bold"], end="")
+    cprint("*", "blue", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    if plugins:
+        print("Found the following plugins: ", end="")
+        for plugin in plugins[:-1]:
+            cprint(plugin, 'yellow', end="")
+            print(', ', end="")
+        cprint(plugins[-1], 'yellow')
+    else:
+        print("No plugin found.")
+
+
+def print_found_export(path):
+    cprint("[", attrs=["bold"], end="")
+    cprint("+", "green", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    print("Found cleartext export ", end="")
+    cprint("'{}'".format(path), "blue")
+    return
+
+def print_copied_export(path):
+    cprint("[", attrs=["bold"], end="")
+    cprint("+", "green", attrs=["bold"], end="")
+    cprint("]", attrs=["bold"], end=" ")
+    print("Moved remote export to ", end="")
+    cprint("'{}'".format(path), "blue")
+
 class Loader: # taken from https://stackoverflow.com/questions/22029562/python-how-to-make-simple-animated-loading-while-process-is-running
     def __init__(self, desc="", end="", timeout=0.05):
         """
