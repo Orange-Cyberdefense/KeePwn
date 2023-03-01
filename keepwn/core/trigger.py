@@ -8,7 +8,8 @@ from lxml import etree
 from impacket.smbconnection import SessionError
 from termcolor import cprint
 
-from keepwn.utils.logging import print_error, print_info, print_success, Loader, print_alert
+from keepwn.utils.logging import print_error, print_info, print_success, Loader, print_alert, print_copied_export, \
+    print_found_export
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 
@@ -117,7 +118,7 @@ def get_triggers_names(smb_connection, share, config_file_path):
     return triggers
 
 
-def check(options):
+def check_trigger(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     target = targets[0]
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
@@ -146,7 +147,7 @@ def check(options):
         print_success("No trigger found in KeePass configuration")
 
 
-def add(options):
+def add_trigger(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     target = targets[0]
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
@@ -204,7 +205,7 @@ def add(options):
     # TODO: print warning message that the trigger may be overridden if keepass is running (config file reloaded)
 
 
-def clean(options):
+def clean_trigger(options):
 
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     target = targets[0]
@@ -259,7 +260,7 @@ def clean(options):
     # TODO: print warning message that the trigger may not be deleted if keepass is running (config file reloaded)
 
 
-def poll(options):
+def poll_trigger(options):
 
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     target = targets[0]
@@ -295,7 +296,7 @@ def poll(options):
     except KeyboardInterrupt:
         exit()
 
-    print_success("Found cleartext export '\\\\{}\\{}' !".format(share, export_path))
+    print_found_export('\\\\{}\\{}'.format(share, export_path))
 
     try:
         buffer = BytesIO()
@@ -306,6 +307,6 @@ def poll(options):
             f.write(buffer.getbuffer())
 
         smb_connection.deleteFile(share, export_path)
-        print_success("Moved remote export to '{}'".format(local_path))
+        print_copied_export("Moved remote export to '{}'".format(local_path))
     except:
         print_error("Unkown error while getting export.")
