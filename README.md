@@ -22,9 +22,9 @@
   - [ ] Customize triggers with command line arguments.
 - [ ] KeePass Cracking
   - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
-- [ ] KeePass Plugin Abuse
-  - [ ] Automatically upload a plugin (DLL or PFX format) to extract passwords, see [KeeFarce Reborn](https://github.com/d3lb3/KeeFarceReborn).
-  - [ ] Automatically poll for cleartext exports on the remote host.
+- [x] KeePass Plugin Abuse
+  - [x] Automatically upload a plugin (DLL or PFX format) to extract passwords, see [KeeFarce Reborn](https://github.com/d3lb3/KeeFarceReborn).
+  - [x] Automatically poll for cleartext exports on the remote host.
 - [x] Authentication
   - [x] Support LM/NT hash authentication.
   - [ ] Support Kerberos Authentication.
