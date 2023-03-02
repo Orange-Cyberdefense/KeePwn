@@ -3,3 +3,4 @@ chardet
 lxml
 termcolor
 setuptools
+pefile
