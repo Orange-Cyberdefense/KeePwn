@@ -4,7 +4,7 @@ from keepwn.core.trigger import check_trigger, add_trigger, clean_trigger, poll_
 from keepwn.utils.parser import parse_args
 
 
-VERSION = "0.1"
+VERSION = "0.2"
 banner = "KeePwn v{} - by Julien BEDEL (@d3lb3_)\n".format(VERSION)
 
 def main():
