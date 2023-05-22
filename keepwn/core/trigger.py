@@ -194,7 +194,7 @@ def add_trigger(options):
         raise
 
     if 'export' in get_triggers_names(smb_connection, share, config_file_path):
-        print_success("Malicious trigger 'export' successfully added to KeePass configuration file.")
+        print_success("Malicious trigger 'export' successfully added to KeePass configuration file (it may be deleted if KeePass is currently running).")
     else:
         print_error("Unokwn error while adding trigger 'export' to KeePass configuration file.")
     # TODO: print warning message that the trigger may be overridden if keepass is running (config file reloaded)
@@ -220,7 +220,7 @@ def clean_trigger(options):
     if not config_file_path:
         return
 
-    if not get_triggers_names(smb_connection, share, config_file_path):
+    if 'export' not in get_triggers_names(smb_connection, share, config_file_path):
         print_info("No malicious trigger called 'export' in the configuration file.")
         return
 
@@ -302,6 +302,6 @@ def poll_trigger(options):
             f.write(buffer.getbuffer())
 
         smb_connection.deleteFile(share, export_path)
-        print_success("Move remote export to {}".format(format_path(local_path)))
+        print_success("Moved remote export to {}".format(format_path(local_path)))
     except:
         print_error("Unkown error while getting export.")

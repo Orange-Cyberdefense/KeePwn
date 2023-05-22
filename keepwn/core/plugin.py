@@ -81,7 +81,7 @@ def add_plugin(options):
         exit()
 
     if not (options.plugin.lower().endswith('dll') or options.plugin.lower().endswith('plgx')):
-        print_warning("The specified plugin file does not look like a plugin, do you want to use it anyway? [y/n]")
+        print_warning("The specified file does not look like a plugin, do you want to use it anyway? [y/n]")
         ans = input('> ')
         if ans.lower() not in['y', 'yes', '']:
             exit(0)
