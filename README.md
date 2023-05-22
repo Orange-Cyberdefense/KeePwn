@@ -107,13 +107,13 @@ If the configuration file path is not the default location, you can specify one 
 
 ### Memory Dumps Parsing
 
-As described by [@vdohney](https://github.com/vdohney/keepass-password-dumper), it is possible to retrieve the database's master password memory dumps (CVE-2023-32784, affecting versions prior to KeePass 2.54). 
+As described by [@vdohney](https://github.com/vdohney/keepass-password-dumper), it is possible to retrieve the database's master password in memory (CVE-2023-32784, affecting versions prior to KeePass 2.54). 
 
-KeePwn `parse_dump` module will search for potential master password candidates in memory dumps. Because the resulting strings will (by design) be incomplete, the module can then be used to bruteforce the missing first character against a specified KDBX file.
+KeePwn `parse_dump` module will search for potential master password candidates in dumps. Because the resulting strings will (by design) be incomplete, the module can also be used to bruteforce the missing first character against a specified KDBX file.
 
 ![](./.github/images/keepwn_parse_dump_example.png)
 
-The memory dump parsing makes use of [@CMEPW's Python PoC](https://github.com/CMEPW/keepass-dump-masterkey). Thanks for letting me use the code :)
+The memory dump parsing makes use of [@CMEPW's Python PoC](https://github.com/CMEPW/keepass-dump-masterkey). Thanks for letting me re-use the code :)
 
 ## Contribute
 
