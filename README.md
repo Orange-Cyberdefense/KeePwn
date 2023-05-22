@@ -24,8 +24,8 @@
   - [x] Automatically poll for cleartext exports on the remote host.
   - [ ] Customize triggers with command line arguments.
 - [x] KeePass Dump Parsing (CVE-2023-32784)
-  - [x] Parse memory dumps to find master password candidates
-  - [x] Bruteforce missing characters with the most common unicode characters
+  - [x] Parse memory dumps to find master password candidates.
+  - [x] Bruteforce missing characters with the most common unicode characters.
 - [ ] KeePass Cracking
   - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
 - [x] Authentication
