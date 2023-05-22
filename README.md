@@ -59,11 +59,13 @@ KeePwn's `search` module is used to identify hosts that run KeePass on your targ
 
 ![](./.github/images/keepwn_search_example.png)
 
-The module makes use of the built-in C$ share to look for KeePass-related files in default locations. For the moment, the module only searches for the global KeePass.exe binary (in Program Files) and the local KeePass.config.xml (in %APPDATA%). Future release should include KeePass local installation (for example: on a user's Dekstop) and Windows Store installation.
+It makes use of the built-in C$ share to look for KeePass-related files in default locations, hence requiring administrator privileges on the targets.
+
+Note that for the moment, it only searches for the global KeePass.exe binary (in Program Files) and the local KeePass.config.xml (in %APPDATA%). Future release should include KeePass local installation paths (for example: on a user's Dekstop) as well as Windows Store installation.
 
 ### Plugin
 
-KeePass features a [plugin framework](https://keepass.info/help/v2/plugins.html) which can be abuse to load malicious DLLs (see: [KeeFarceRebornPlugin](https://github.com/d3lb3/KeeFarceReborn#make-keepass-inject-keefarce-reborn-as-a-plugin)  into KeePass process, allowing attackers with administrator rights to easily export the database.
+KeePass features a [plugin framework](https://keepass.info/help/v2/plugins.html) which can be abused to load malicious DLLs into KeePass process, allowing attackers with administrator rights to easily export the database (see: [KeeFarceRebornPlugin](https://github.com/d3lb3/KeeFarceReborn#make-keepass-inject-keefarce-reborn-as-a-plugin)).
 
 KeePwn's `plugin` module allows to :
 
@@ -99,7 +101,7 @@ KeePwn's `trigger` module allows to :
 
   ![](./.github/images/keepwn_trigger_poll_example.png)
 
-If the configuration file path is not in the default location, you can specify one with `--config-path` argument.
+If the configuration file path is not the default location, you can specify one with `--config-path` argument.
 
 ## Contribute
 
