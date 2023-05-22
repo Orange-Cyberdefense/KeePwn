@@ -23,6 +23,10 @@
   - [x] Add and remove triggers from KeePass configuration file via SMB C$ share.
   - [x] Automatically poll for cleartext exports on the remote host.
   - [ ] Customize triggers with command line arguments.
+- [x] KeePass Dump Parsing (CVE-2023-32784)
+  - [x] Parse memory dumps to find master password candidates
+  - [x] Bruteforce missing characters with the most common unicode characters
+
 - [ ] KeePass Cracking
   - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
 - [x] Authentication
@@ -102,6 +106,16 @@ KeePwn's `trigger` module allows to :
   ![](./.github/images/keepwn_trigger_poll_example.png)
 
 If the configuration file path is not the default location, you can specify one with `--config-path` argument.
+
+### Parse Dumps
+
+As described by [@vdohney](https://github.com/vdohney/keepass-password-dumper), it is possible to retrieve the database's master password memory dumps (CVE-2023-32784, affecting versions prior to KeePass 2.54). 
+
+KeePwn `parse_dump` module will search for potential master password candidates in memory dumps. Because the resulting strings will (by design) be incomplete, the module can then be used to bruteforce the missing first character against a specified KDBX file.
+
+![](./.github/images/keepwn_parse_dump_example.png)
+
+The memory dump parsing makes use of [@CMEPW's Python PoC](https://github.com/CMEPW/keepass-dump-masterkey). Thanks for letting me use the code :)
 
 ## Contribute
 
