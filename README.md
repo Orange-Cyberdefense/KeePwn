@@ -26,7 +26,6 @@
 - [x] KeePass Dump Parsing (CVE-2023-32784)
   - [x] Parse memory dumps to find master password candidates
   - [x] Bruteforce missing characters with the most common unicode characters
-
 - [ ] KeePass Cracking
   - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
 - [x] Authentication
@@ -34,8 +33,7 @@
   - [ ] Support Kerberos Authentication.
 - [ ] Miscellaneous
   - [ ] Write unit tests.
-  - [ ] Make the project available on [PyPI](https://pypi.org/) 
-
+  - [ ] Make the project available on [PyPI](https://pypi.org/) .
 
 ## Installation
 
