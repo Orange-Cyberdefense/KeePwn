@@ -55,7 +55,7 @@ python3 KeePwn.py --help
 
 ## Usage
 
-### Search
+### Discovery
 
 KeePwn's `search` module is used to identify hosts that run KeePass on your target environment.
 
@@ -65,7 +65,7 @@ It makes use of the built-in C$ share to look for KeePass-related files in defau
 
 Note that for the moment, it only searches for the global KeePass.exe binary (in Program Files) and the local KeePass.config.xml (in %APPDATA%). Future release should include KeePass local installation paths (for example: on a user's Dekstop) as well as Windows Store installation.
 
-### Plugin
+### Plugin Abuse
 
 KeePass features a [plugin framework](https://keepass.info/help/v2/plugins.html) which can be abused to load malicious DLLs into KeePass process, allowing attackers with administrator rights to easily export the database (see: [KeeFarceRebornPlugin](https://github.com/d3lb3/KeeFarceReborn#make-keepass-inject-keefarce-reborn-as-a-plugin)).
 
@@ -85,7 +85,7 @@ KeePwn's `plugin` module allows to :
 
 These actions are made through SMB C$ share access, limiting AV/EDR detection as no command execution is performed.
 
-### Trigger
+### Trigger Abuse
 
 As described in [@harmj0y's blog post](https://blog.harmj0y.net/redteaming/keethief-a-case-study-in-attacking-keepass-part-2/) (and later CVE-2023-24055), KeePass trigger system can be abused in order to export the database in cleartext.
 
@@ -105,7 +105,7 @@ KeePwn's `trigger` module allows to :
 
 If the configuration file path is not the default location, you can specify one with `--config-path` argument.
 
-### Parse Dumps
+### Memory Dumps Parsing
 
 As described by [@vdohney](https://github.com/vdohney/keepass-password-dumper), it is possible to retrieve the database's master password memory dumps (CVE-2023-32784, affecting versions prior to KeePass 2.54). 
 
