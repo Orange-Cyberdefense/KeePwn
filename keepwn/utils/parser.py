@@ -164,6 +164,10 @@ def parse_args():
         trigger_poll_subparser.print_help()
         exit(0)
 
+    if options.mode == 'plugin' and len(sys.argv) == 2:
+        trigger_subparser.print_help()
+        exit(0)
+
     if options.mode == 'plugin' and options.plugin_mode == 'check' and len(sys.argv) == 3:
         plugin_check_subparser.print_help()
         exit(0)
