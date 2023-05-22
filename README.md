@@ -53,31 +53,53 @@ python3 KeePwn.py --help
 
 ## Usage
 
-### Search Mode
+### Search
 
-The `search` module is used to identify hosts that run KeePass on your target environment. It makes use of the built-in C$ share to look for default KeePass-related files locations. For the moment, it only searches for global KeePass.exe binary (in *Program Files*) and local KeePass.config.xml (in *%APPDATA%*).
+KeePwn's `search` module is used to identify hosts that run KeePass on your target environment.
 
-![](./.github/images/keepwn_search_example.png)While enumerating KeePass through SMB shares is quieter against antiviruses protections, it sometimes lack some information like "is KeePass currently being run ?" (useful if you want to extract secrets through DLL injection with [KeeFarceReborn](https://github.com/d3lb3/KeeFarceReborn)). I will soon implement the `--search-process` flag that will check for live KeePass process execution through Impacket-based remote command execution.
+![](./.github/images/keepwn_search_example.png)
 
-### Trigger Mode
+The module makes use of the built-in C$ share to look for KeePass-related files in default locations. For the moment, the module only searches for the global KeePass.exe binary (in Program Files) and the local KeePass.config.xml (in %APPDATA%). Future release should include KeePass local installation (for example: on a user's Dekstop) and Windows Store installation.
 
-As described in @harmj0y's [blog post (*Exfiltration Without Malware* part)](https://blog.harmj0y.net/redteaming/keethief-a-case-study-in-attacking-keepass-part-2/), KeePass trigger system can be abused in order to export the database in cleartext. KeePwn trigger modules allows to :
+### Plugin
 
-- Check if a malicious trigger named "export" is currently present in KeePass configuration.
+KeePass features a [plugin framework](https://keepass.info/help/v2/plugins.html) which can be abuse to load malicious DLLs (see: [KeeFarceRebornPlugin](https://github.com/d3lb3/KeeFarceReborn#make-keepass-inject-keefarce-reborn-as-a-plugin)  into KeePass process, allowing attackers with administrator rights to easily export the database.
+
+KeePwn's `plugin` module allows to :
+
+- List currently installed plugins
+
+  ![](./.github/images/keepwn_plugin_check_example.png)
+
+- Add and remove your malicious plugins
+
+  ![](./.github/images/keepwn_plugin_add_example.png)
+
+- Poll %APPDATA% for exports and automatically moves it from remote host to local filesystem
+
+  ![](./.github/images/keepwn_plugin_poll_example.png)
+
+These actions are made through SMB C$ share access, limiting AV/EDR detection as no command execution is performed.
+
+### Trigger
+
+As described in [@harmj0y's blog post](https://blog.harmj0y.net/redteaming/keethief-a-case-study-in-attacking-keepass-part-2/) (and later CVE-2023-24055), KeePass trigger system can be abused in order to export the database in cleartext.
+
+KeePwn's `trigger` module allows to :
+
+- Check if a malicious trigger named "export" is currently written in KeePass configuration
 
   ![](./.github/images/keepwn_trigger_check_example.png)
 
-- Add and remove a malicious trigger named "export" which performs a cleartext export of the database in %APPDATA% on next KeePass launch.
+- Add and remove a malicious trigger named "export" which performs a cleartext export of the database in %APPDATA% on next KeePass launch
 
   ![](./.github/images/keepwn_trigger_add_example.png)
 
-- Poll %APPDATA% for exports and automatically moves it from remote host to local.
+- Poll %APPDATA% for exports and automatically moves it from remote host to local filesystem
 
   ![](./.github/images/keepwn_trigger_poll_example.png)
 
-Once again, these actions are made through SMB C$ share access, limiting antiviral detection as no command execution is performed.
-
-If no configuration file path is specified, note that KeePwn will try to find it manually by looking in default locations. As KeePass trigger manipulation should always be added with caution, the mode is limited to 1 host and 1 configuration file at a time. Feel free to let me know if you think of a use case that would need more than that (massive trigger abuse on a whole network?). 
+If the configuration file path is not in the default location, you can specify one with `--config-path` argument.
 
 ## Contribute
 
