@@ -117,6 +117,12 @@ def parse_args():
     plugin_poll_parser_poll = plugin_poll_parser.add_argument_group("Polling")
     plugin_poll_parser_poll.add_argument("-si", "--single", action='store_true', help='Only poll for the cleartext export once')
 
+    # parse_dump subparser
+    parse_dump_parser = argparse.ArgumentParser(add_help=False)
+    parse_dump_parser.add_argument("-d", "--dump_file", default=None, help="Path of the memory dump to parse")
+    parse_dump_parser.add_argument("-b", "--bruteforce", default=None, help="Database to bruteforce")
+
+
     # adding the subparsers to the main parser
     subparsers = main_parser.add_subparsers(help="Mode", dest="mode")
     search_subparser = subparsers.add_parser("search", parents=[search_parser], help="Identify hosts that run KeePass on your target environment")
@@ -132,6 +138,7 @@ def parse_args():
     plugin_add_subparser = plugin_subparsers.add_parser("add", parents=[plugin_add_parser])
     plugin_remove_subparser = plugin_subparsers.add_parser("remove", parents=[plugin_remove_parser])
     plugin_poll_subparser = plugin_subparsers.add_parser("poll", parents=[plugin_poll_parser])
+    parse_dump_subparser = subparsers.add_parser("parse_dump", parents=[parse_dump_parser], help="Find the master password in memory dump (CVE-2023-32784)")
 
     options = main_parser.parse_args()
 
@@ -182,6 +189,10 @@ def parse_args():
 
     if options.mode == 'plugin' and options.plugin_mode == 'poll' and len(sys.argv) == 3:
         plugin_poll_subparser.print_help()
+        exit(0)
+
+    if options.mode == 'parse_dump' and len(sys.argv) == 2:
+        parse_dump_subparser.print_help()
         exit(0)
 
     return options

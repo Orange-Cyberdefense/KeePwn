@@ -1,11 +1,12 @@
 import os
 
+from keepwn.core.parse_dump import parse_dump
 from keepwn.core.plugin import check_plugin, add_plugin, clean_plugin, poll_plugin
 from keepwn.core.search import search
 from keepwn.core.trigger import check_trigger, add_trigger, clean_trigger, poll_trigger
 from keepwn.utils.parser import parse_args
 
-VERSION = "0.2"
+VERSION = "0.3"
 banner = "KeePwn v{} - by Julien BEDEL (@d3lb3_)\n".format(VERSION)
 
 def main():
@@ -35,6 +36,9 @@ def main():
             clean_plugin(options)
         if options.plugin_mode == 'poll':
             poll_plugin(options)
+    if options.mode == 'parse_dump':
+        parse_dump(options)
+
 
 if __name__ == '__main__':
     main()
