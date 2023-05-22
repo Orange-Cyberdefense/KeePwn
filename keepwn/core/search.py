@@ -4,9 +4,9 @@ from io import BytesIO
 
 import pefile
 from impacket.smbconnection import SessionError
+from termcolor import colored
 
-from keepwn.utils.logging import print_found_keepass, print_not_found_keepass, print_error_target, \
-    print_found_keepass_xml
+from keepwn.utils.logging import print_error_target, print_debug_target, format_path, print_success_target
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 
@@ -54,9 +54,22 @@ def search(options):
                 enum_dict = pe.dump_dict()
                 version = enum_dict['Version Information'][0][2][11][b'ProductVersion'].decode("utf-8")
                 # display
-                print_found_keepass(target, '\\\\{}{}'.format(share, path), version, difference)
+                last_access_message = '{} days ago'.format(difference.days)
+                if difference.days == 0:
+                    if difference.seconds // 3600 > 0:
+                        last_access_message = '{} hours ago'.format(difference.seconds // 3600)
+                    else:
+                        last_access_message = '{} minutes ago'.format((difference.seconds // 60) % 60)
+                version = '.'.join(version.split('.')[0:3])
+                message = "Found {} ".format(format_path('\\\\{}{}'.format(share, path)))
+                message += colored("(Version: ", "cyan")
+                message += colored(version, "yellow") + ', '
+                message += colored("LastAccessTime: ", "cyan")
+                message += colored(last_access_message, "yellow")
+                message += colored(")", "cyan")
+                print_success_target(target, message)
         except SessionError:
-            print_not_found_keepass(target)
+            print_debug_target(target, "No KeePass-related file found")
 
         try:
             for file in smb_connection.listPath(share, '\\Users\\*'):
@@ -64,7 +77,7 @@ def search(options):
                     try:
                         path = '\\Users\\{}\\AppData\\Roaming\\KeePass\\KeePass.config.xml'.format(file.get_longname())
                         for file in smb_connection.listPath(share, path):
-                            print_found_keepass_xml(target, '\\\\{}{}'.format(share, path))
+                            print_success_target(target, "Found {}".format(format_path('\\\\{}{}'.format(share, path))))
 
                     except SessionError as e:
                         pass  # the file was not found

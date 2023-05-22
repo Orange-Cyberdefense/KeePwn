@@ -3,7 +3,9 @@ from shutil import get_terminal_size
 from threading import Thread
 from time import sleep
 
-from termcolor import cprint
+# TODO: replace termcolor with colorama (active, with unit tests)
+from termcolor import cprint, colored
+
 
 def print_success(string):
     cprint("[", attrs=["bold"], end="")
@@ -41,57 +43,29 @@ def print_info_target(target, string):
     cprint("]", attrs=["bold"], end=" ")
     print(string)
 
-def print_alert(string):
+def print_warning(string):
     cprint("[", attrs=["bold"], end="")
     cprint("!", "yellow", attrs=["bold"], end="")
     cprint("]", attrs=["bold"], end=" ")
     print(string)
 
-def print_alert_target(target, string):
+def print_warning_target(target, string):
     cprint("[", attrs=["bold"], end="")
     cprint(target, "blue", attrs=["bold"], end="")
     cprint("]", attrs=["bold"], end=" ")
     print(string)
 
-def print_found_keepass(target, path, version, time_difference):
-    last_access_message = '{} days ago'.format(time_difference.days)
-    if time_difference.days == 0:
-        if time_difference.seconds // 3600 > 0:
-            last_access_message = '{} hours ago'.format(time_difference.seconds // 3600)
-        else:
-            last_access_message = '{} minutes ago'.format((time_difference.seconds // 60) % 60)
-    version = '.'.join(version.split('.')[0:3])
+def print_debug(string):
     cprint("[", attrs=["bold"], end="")
-    cprint(target, "green", attrs=["bold"], end="")
+    cprint("#", "grey", attrs=["bold"], end="")
     cprint("]", attrs=["bold"], end=" ")
-    cprint("Found ", end="")
-    cprint("'{}'".format(path), "blue", end="")
-    cprint(" (Version:", "cyan", end=" ")
-    cprint(version, "yellow", end="")
-    print(", ", end=" ")
-    cprint("LastAccessTime:", "cyan", end=" ")
-    cprint(last_access_message, "yellow", end="")
-    cprint(")", "cyan")
+    print(string)
 
-def print_found_keepass_xml(target, path):
-    cprint("[", attrs=["bold"], end="")
-    cprint(target, "green", attrs=["bold"], end="")
-    cprint("]", attrs=["bold"], end=" ")
-    cprint("Found ", end="")
-    cprint("'{}'".format(path), "blue")
-
-def print_not_found_keepass(target):
+def print_debug_target(target, string):
     cprint("[", attrs=["bold"], end="")
     cprint(target, "grey", attrs=["bold"], end="")
     cprint("]", attrs=["bold"], end=" ")
-    cprint("No KeePass-related file found")
-
-def print_found_plugin_directory(path):
-    cprint("[", attrs=["bold"], end="")
-    cprint("*", "blue", attrs=["bold"], end="")
-    cprint("]", attrs=["bold"], end=" ")
-    print("Found KeePass Plugins directory ", end=" ")
-    cprint("'{}'".format(path), "blue")
+    print(string)
 
 def print_found_plugins(plugins):
     cprint("[", attrs=["bold"], end="")
@@ -106,21 +80,8 @@ def print_found_plugins(plugins):
     else:
         print("No plugin found.")
 
-
-def print_found_export(path):
-    cprint("[", attrs=["bold"], end="")
-    cprint("+", "green", attrs=["bold"], end="")
-    cprint("]", attrs=["bold"], end=" ")
-    print("Found cleartext export ", end="")
-    cprint("'{}'".format(path), "blue")
-    return
-
-def print_copied_export(path):
-    cprint("[", attrs=["bold"], end="")
-    cprint("+", "green", attrs=["bold"], end="")
-    cprint("]", attrs=["bold"], end=" ")
-    print("Moved remote export to ", end="")
-    cprint("'{}'".format(path), "blue")
+def format_path(path):
+    return colored("'" + path + "'", "blue")
 
 class Loader: # taken from https://stackoverflow.com/questions/22029562/python-how-to-make-simple-animated-loading-while-process-is-running
     def __init__(self, desc="", end="", timeout=0.05):
@@ -137,7 +98,7 @@ class Loader: # taken from https://stackoverflow.com/questions/22029562/python-h
         self.timeout = timeout
 
         self._thread = Thread(target=self._animate, daemon=True)
-        self.steps = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        self.steps = ["[⠋]", "[⠙]", "[⠹]", "[⠸]", "[⠼]", "[⠴]", "[⠦]", "[⠧]", "[⠇]", "[⠏]"]
         self.done = False
 
     def start(self):
@@ -148,7 +109,7 @@ class Loader: # taken from https://stackoverflow.com/questions/22029562/python-h
         for c in cycle(self.steps):
             if self.done:
                 break
-            print(f"\r{self.desc} {c}", flush=True, end="")
+            print(f"\r{c} {self.desc}", flush=True, end="")
             sleep(self.timeout)
 
     def __enter__(self):
@@ -158,7 +119,7 @@ class Loader: # taken from https://stackoverflow.com/questions/22029562/python-h
         self.done = True
         cols = get_terminal_size((80, 20)).columns
         print("\r" + " " * cols, end="", flush=True)
-        print(f"\r{self.end}", flush=True)
+        print(f"\r{'[' + colored('*', 'blue') + '] ' + self.end}", flush=True)
 
     def __exit__(self, exc_type, exc_value, tb):
         # handle exceptions with those variables ^
