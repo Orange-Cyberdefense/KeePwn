@@ -8,7 +8,7 @@ with open('requirements.txt', 'r', encoding='utf-8') as f:
 
 setuptools.setup(
     name="keepwn",
-    version="0.0.1",
+    version="0.2.0",
     author="Julien Bedel - @d3lb3_",
     author_email="d3lb3@protonmail.com",
     description="A python tool to automate KeePass discovery and secret extraction.",
