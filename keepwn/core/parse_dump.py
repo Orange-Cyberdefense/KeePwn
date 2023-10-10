@@ -22,7 +22,7 @@ def get_candidates(dump_file): # code taken from @CMEPW: https://github.com/CMEP
             str_len += 1
             i += 1
         elif str_len > 0:
-            if (data[i] >= 0x20) and (data[i] <= 0x7E) and (data[i + 1] == 0x00):
+            if (data[i] >= 0x20) and (data[i] <= 0xFF) and (data[i + 1] == 0x00):
                 candidate = (str_len * b'\xCF\x25') + bytes([data[i], data[i + 1]])
                 if not candidate in candidates:
                     candidates.append(candidate)
