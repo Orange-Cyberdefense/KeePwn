@@ -197,10 +197,13 @@ def parse_args():
 
     return options
 
-# TODO: check number of targets in various scenarios (1 for trigger, more for search)
 def parse_mandatory_options(options):
     # check for mandatory options
-    if (options.mode == 'trigger' and not options.target) or (not options.target and not options.targets_file):
+    if (options.mode == 'search' and not (options.target or options.targets_file)):
+        print_error('Missing target (use --help to list parameters)')
+        exit(0)
+
+    if ((options.mode == 'trigger' or options.mode == 'plugin') and not options.target):
         print_error('Missing target (use --help to list parameters)')
         exit(0)
 
