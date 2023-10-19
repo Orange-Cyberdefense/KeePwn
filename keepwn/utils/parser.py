@@ -125,7 +125,8 @@ def parse_args():
     #convert subparser
     convert_parser = argparse.ArgumentParser(add_help=False)
     convert_parser.add_argument("-ct", "--convert_type", default=None, help="Conversion type (John or Hashcat)")
-    convert_parser.add_argument("-db", "--database_name", default=None, help="KDBX database to convert in hash")
+    convert_parser.add_argument("-db", "--database_path", default=None, help="KDBX database to convert in hash")
+    convert_parser.add_argument("-o", "--output_file", default=None, help="Output hash file")
 
     # adding the subparsers to the main parser
     subparsers = main_parser.add_subparsers(help="Mode", dest="mode")
