@@ -122,6 +122,10 @@ def parse_args():
     parse_dump_parser.add_argument("-d", "--dump_file", default=None, help="Path of the memory dump to parse")
     parse_dump_parser.add_argument("-b", "--bruteforce", default=None, help="Database to bruteforce")
 
+    #convert subparser
+    convert_parser = argparse.ArgumentParser(add_help=False)
+    convert_parser.add_argument("-ct", "--convert_type", default=None, help="Conversion type (John or Hashcat)")
+    convert_parser.add_argument("-db", "--database_name", default=None, help="KDBX database to convert in hash")
 
     # adding the subparsers to the main parser
     subparsers = main_parser.add_subparsers(help="Mode", dest="mode")
@@ -139,6 +143,7 @@ def parse_args():
     plugin_remove_subparser = plugin_subparsers.add_parser("remove", parents=[plugin_remove_parser])
     plugin_poll_subparser = plugin_subparsers.add_parser("poll", parents=[plugin_poll_parser])
     parse_dump_subparser = subparsers.add_parser("parse_dump", parents=[parse_dump_parser], help="Find the master password in memory dump (CVE-2023-32784)")
+    convert_subparser = subparsers.add_parser("convert", parents=[convert_parser], help="Convert KDBX to John and Hashcat compatible formats (including KDBX 4)")
 
     options = main_parser.parse_args()
 
@@ -193,6 +198,10 @@ def parse_args():
 
     if options.mode == 'parse_dump' and len(sys.argv) == 2:
         parse_dump_subparser.print_help()
+        exit(0)
+
+    if options.mode == 'convert' and len(sys.argv) == 2:
+        convert_subparser.print_help()
         exit(0)
 
     return options
