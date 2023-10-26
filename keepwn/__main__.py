@@ -1,6 +1,7 @@
 import os
 
 from keepwn.core.parse_dump import parse_dump
+from keepwn.core.convert import convert
 from keepwn.core.plugin import check_plugin, add_plugin, clean_plugin, poll_plugin
 from keepwn.core.search import search
 from keepwn.core.trigger import check_trigger, add_trigger, clean_trigger, poll_trigger
@@ -38,7 +39,8 @@ def main():
             poll_plugin(options)
     if options.mode == 'parse_dump':
         parse_dump(options)
-
+    if options.mode == 'convert':
+        convert(options)
 
 if __name__ == '__main__':
     main()
