@@ -56,7 +56,7 @@ python3 KeePwn.py --help
 
 ## Usage
 
-### Discovery
+<details><summary><b>Discovery</b></summary>
 
 KeePwn's `search` module is used to identify hosts that run KeePass on your target environment.
 
@@ -66,7 +66,8 @@ It makes use of the built-in C$ share to look for KeePass-related files in defau
 
 Note that for the moment, it only searches for the global KeePass.exe binary (in Program Files) and the local KeePass.config.xml (in %APPDATA%). Future release should include KeePass local installation paths (for example: on a user's Dekstop) as well as Windows Store installation.
 
-### Plugin Abuse
+</details>
+<details><summary><b>Plugin Abuse</b></summary>
 
 KeePass features a [plugin framework](https://keepass.info/help/v2/plugins.html) which can be abused to load malicious DLLs into KeePass process, allowing attackers with administrator rights to easily export the database (see: [KeeFarceRebornPlugin](https://github.com/d3lb3/KeeFarceReborn#make-keepass-inject-keefarce-reborn-as-a-plugin)).
 
@@ -86,7 +87,8 @@ KeePwn's `plugin` module allows to :
 
 These actions are made through SMB C$ share access, limiting AV/EDR detection as no command execution is performed.
 
-### Trigger Abuse
+</details>
+<details><summary><b>Trigger Abuse</b></summary>
 
 As described in [@harmj0y's blog post](https://blog.harmj0y.net/redteaming/keethief-a-case-study-in-attacking-keepass-part-2/) (and later CVE-2023-24055), KeePass trigger system can be abused in order to export the database in cleartext.
 
@@ -106,7 +108,8 @@ KeePwn's `trigger` module allows to :
 
 If the configuration file path is not the default location, you can specify one with `--config-path` argument.
 
-### Memory Dumps Parsing
+</details>
+<details><summary><b>Memory Dumps Parsing</b></summary>
 
 As described by [@vdohney](https://github.com/vdohney/keepass-password-dumper), it is possible to retrieve the database's master password in memory (CVE-2023-32784, affecting versions prior to KeePass 2.54). 
 
@@ -116,7 +119,8 @@ KeePwn `parse_dump` module will search for potential master password candidates 
 
 The memory dump parsing makes use of [@CMEPW's Python PoC](https://github.com/CMEPW/keepass-dump-masterkey). Thanks for letting me re-use the code :)
 
-### Cracking KDBX Databases
+</details>
+<details><summary><b>Cracking KDBX Databases</b></summary>
 
 keepass2john.py script by [@harmjoy](https://github.com/HarmJ0y) was ported to KeePwn with the help of [@0xSp3ctra](https://github.com/0xSp3ctra).
 
