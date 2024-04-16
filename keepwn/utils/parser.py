@@ -16,7 +16,7 @@ def parse_args():
     search_parser_targets.add_argument("-t", "--target", default=None, help="IP address, range or hostname of the target machine")
     search_parser_targets.add_argument("-tf", "--targets-file", default=None, help="File containing a list of IP address, ranges or hostnames of target machines")
     search_parser_auth = search_parser.add_argument_group("Authentication")
-    search_parser_auth.add_argument("-d", "--domain", default=None, help='Windows domain name to authenticate to (if ommited, will perform local Windows authentication)')
+    search_parser_auth.add_argument("-d", "--domain", default='.', help='Windows domain name to authenticate to (if ommited, will perform local Windows authentication)')
     search_parser_auth.add_argument("-u", "--user", default=None, help='Username to authenticate to the remote machine')
     search_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     search_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
