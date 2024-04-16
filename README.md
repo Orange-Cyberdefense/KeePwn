@@ -26,8 +26,9 @@
 - [x] KeePass Dump Parsing (CVE-2023-32784)
   - [x] Parse memory dumps to find master password candidates.
   - [x] Bruteforce missing characters with the most common unicode characters.
-- [ ] KeePass Cracking
-  - [ ] Convert KDBX to John and Hashcat compatible formats (including KDBX 4).
+- [x] KeePass Database Cracking
+  - [x] Convert KDBX to John and Hashcat compatible formats.
+  - [ ] Add support for [KDBX 4.x format](https://palant.info/2023/03/29/documenting-keepass-kdbx4-file-format).
 - [x] Authentication
   - [x] Support LM/NT hash authentication.
   - [ ] Support Kerberos Authentication.
@@ -114,6 +115,21 @@ KeePwn `parse_dump` module will search for potential master password candidates 
 ![](./.github/images/keepwn_parse_dump_example.png)
 
 The memory dump parsing makes use of [@CMEPW's Python PoC](https://github.com/CMEPW/keepass-dump-masterkey). Thanks for letting me re-use the code :)
+
+### Cracking KDBX Databases
+
+keepass2john.py script by [@harmjoy](https://github.com/HarmJ0y) was ported to KeePwn with the help of [@0xSp3ctra](https://github.com/0xSp3ctra).
+
+KeePwn `convert` will extract a crackable hash (john or hashcat format) from a KeePass Database. 
+
+![](./.github/images/keepwn_convert_example.png)
+
+It can be used with more arguments to specify the expected hash type as well as an output file path:
+
+![](./.github/images/keepwn_convert_example_extended.png)
+
+KDBX 4.x is not yet supported, you may use https://github.com/r3nt0n/keepass4brute. 
+If you are in the mood for a PR https://palant.info/2023/03/29/documenting-keepass-kdbx4-file-format should be a good read :)
 
 ## Contribute
 

@@ -1,31 +1,32 @@
+import os
+
 from keepwn.utils.logging import print_info, print_error, print_success
 from keepwn.utils.keepass2john import process_database
 
-def write_hash(hash, output_file):
-    print_info('Writing converted hash in {} file'.format(output_file))
-    
-    with open(output_file ,"w") as f:
-        f.write(hash)
-
-    print_success('Hash written in destination file. Ready to crack.')
-
 def convert(options):
-    if options.output_file is None:
-        options.output_file = "keepass.hash"
-    
-    if options.convert_type == 'john':
-        print_info('Converting {} in john format'.format(options.database_path))
-        hash = process_database(options.database_path)
 
-    elif options.convert_type == 'hashcat':
-        print_info('Converting {} in hashcat format'.format(options.database_path))
+    if not os.path.isfile(options.database_path):
+        database_name = os.path.basename(options.database_path)
+        print_error('{} file not found'.format(database_name))
+        exit()
+
+    if options.hash_type == 'john':
+        hash = process_database(options.database_path)
+    elif options.hash_type == 'hashcat':
         hash = process_database(options.database_path).split(':')[1]
     else:
-        print_error('Uncorrect convert type, please choose john or hashcat')
+        print_error("Incorrect hash type, please sepcify 'john' or 'hashcat'")
+        exit()
 
     if hash is not None:
-        print(hash)
-        write_hash(hash, options.output_file)
+        crack_hint = {'john': 'john --format=keepass', 'hashcat': 'hashcat -m 13400'}
+        if options.output_file is not None:
+            with open(options.output_file, "w") as f:
+                f.write(hash)
+            print_success('Hash written to {}, happy cracking! (\x1B[3m{}\x1B[0m)'.format(options.output_file, crack_hint[options.hash_type]))
+        else:
+            print_success("Happy cracking! (\x1B[3m{}\x1B[0m)".format(crack_hint[options.hash_type]))
+            print(hash)
     else:
-        print_error('Error during hash extraction. Aborting')
-        exit(0)
+        print_error('Unknown error during hash extraction')
+        exit()

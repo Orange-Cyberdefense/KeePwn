@@ -1,4 +1,14 @@
-#!/usr/bin/python3
+# Source: @HarmJ0y (https://gist.github.com/HarmJ0y/116fa1b559372804877e604d7d367bbc)
+# Adapted to KeePwn by @0xSp3ctra and @d3lb3
+
+# Python port of keepass2john from the John the Ripper suite (http://www.openwall.com/john/)
+# ./keepass2john.c was written by Dhiru Kholia <dhiru.kholia at gmail.com> in March of 2012
+# ./keepass2john.c was released under the GNU General Public License
+#   source keepass2john.c source code from: http://fossies.org/linux/john/src/keepass2john.c
+#
+# Python port by @harmj0y, GNU General Public License
+#
+# TODO: handle keyfiles, test file inlining for 1.X databases, database version sanity check for 1.X
 
 import os
 import struct
@@ -18,8 +28,8 @@ def process_1x_database(data, databaseName, maxInlineSize=1024):
         # Twofish
         algorithm = 1
     else:
-        print_error("Unsupported file encryption!")
-        exit(0)
+        print_error("KDBX 1.x - Unsupported file encryption!")
+        exit()
 
     # TODO: keyfile processing
 
@@ -61,6 +71,12 @@ def process_2x_database(data, databaseName):
 
     index = 12
     endReached = False
+
+    major_version = hexlify(data[10:12])
+    if major_version == b'0400':
+        print_error("KDBX 4.x is not supported yet, you may try https://github.com/r3nt0n/keepass4brute to find the database password")
+        print('    If you are in the mood for a PR https://palant.info/2023/03/29/documenting-keepass-kdbx4-file-format should be a good read :)')
+        exit()
 
     while not endReached:
 
@@ -105,6 +121,7 @@ def process_database(filename):
 
     fileSignature = hexlify(data[0:8])
 
+    hash = None
     if fileSignature == b'03d9a29a67fb4bb5':
         # "2.X"
         hash = process_2x_database(data, databaseName)
@@ -117,6 +134,7 @@ def process_database(filename):
         # "1.X"
         hash = process_1x_database(data, databaseName)
     else:
-        print_error("ERROR: KeePass signature unrecognized")
+        print_error("No KDBX signature found in {}, are you sure this is a KeePass database?".format(base))
+        exit()
 
     return hash

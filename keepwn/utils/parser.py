@@ -124,9 +124,9 @@ def parse_args():
 
     #convert subparser
     convert_parser = argparse.ArgumentParser(add_help=False)
-    convert_parser.add_argument("-ct", "--convert_type", default=None, help="Conversion type (John or Hashcat)")
-    convert_parser.add_argument("-db", "--database_path", default=None, help="KDBX database to convert in hash")
-    convert_parser.add_argument("-o", "--output_file", default=None, help="Output hash file")
+    convert_parser.add_argument("-d", "--database_path", default=None, help="Path of the KDBX database to convert")
+    convert_parser.add_argument("-t", "--hash_type", default='hashcat', help="Output hash type : 'hashcat' (default) or 'john'")
+    convert_parser.add_argument("-o", "--output_file", default=None, help="Path to output file hash (optionnal)")
 
     # adding the subparsers to the main parser
     subparsers = main_parser.add_subparsers(help="Mode", dest="mode")
@@ -144,7 +144,7 @@ def parse_args():
     plugin_remove_subparser = plugin_subparsers.add_parser("remove", parents=[plugin_remove_parser])
     plugin_poll_subparser = plugin_subparsers.add_parser("poll", parents=[plugin_poll_parser])
     parse_dump_subparser = subparsers.add_parser("parse_dump", parents=[parse_dump_parser], help="Find the master password in memory dump (CVE-2023-32784)")
-    convert_subparser = subparsers.add_parser("convert", parents=[convert_parser], help="Convert KDBX to John and Hashcat compatible formats (including KDBX 4)")
+    convert_subparser = subparsers.add_parser("convert", parents=[convert_parser], help="Convert KDBX to John/Hashcat compatible formats (does not include KDBX 4 yet)")
 
     options = main_parser.parse_args()
 
