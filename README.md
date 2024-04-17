@@ -14,7 +14,7 @@
   - [x] Automatically look for KeePass global installation files via SMB C$ share.
   - [ ] Automatically look for KeePass portable + Windows store installation files via SMB C$ share.
   - [ ] Automatically check for running KeePass process through Impacket-based command execution.
-  - [ ] Multi-thread implementation to avoid bottleneck hosts.
+  - [x] Multi-thread implementation to avoid bottleneck hosts.
   - [x] Automatically check for KeePass binary's metadata (version, last access time).
 - [x] KeePass Plugin Abuse
   - [x] Automatically upload a plugin (DLL or PFX format) to extract passwords, see [KeeFarce Reborn](https://github.com/d3lb3/KeeFarceReborn).
