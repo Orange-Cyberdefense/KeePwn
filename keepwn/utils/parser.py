@@ -81,7 +81,7 @@ def parse_args():
     plugin_check_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     plugin_check_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     plugin_check_parser_advanced = plugin_check_parser.add_argument_group("Advanced Configuration")
-    plugin_check_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory (if ommited, will search in default locations)")
+    plugin_check_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # plugin add subparser
     plugin_add_parser = argparse.ArgumentParser(add_help=False)
     plugin_add_parser_target = plugin_add_parser.add_argument_group("Target")
@@ -93,7 +93,7 @@ def parse_args():
     plugin_add_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     plugin_add_parser_advanced = plugin_add_parser.add_argument_group("Advanced Configuration")
     plugin_add_parser_advanced.add_argument("-pl", "--plugin", default=None, help="Path of the local plugin to upload on the target")
-    plugin_add_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory (if ommited, will search in default locations)")
+    plugin_add_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # plugin remove subparser
     plugin_remove_parser = argparse.ArgumentParser(add_help=False)
     plugin_remove_parser_target = plugin_remove_parser.add_argument_group("Target")
@@ -105,7 +105,7 @@ def parse_args():
     plugin_remove_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     plugin_remove_parser_advanced = plugin_remove_parser.add_argument_group("Advanced Configuration")
     plugin_remove_parser_advanced.add_argument("-pl", "--plugin", default=None, help="Path of the local plugin to upload on the target")
-    plugin_remove_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory (if ommited, will search in default locations)")
+    plugin_remove_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # plugin poll subparser
     plugin_poll_parser = argparse.ArgumentParser(add_help=False)
     plugin_poll_parser_target = plugin_poll_parser.add_argument_group("Target")
@@ -117,6 +117,8 @@ def parse_args():
     plugin_poll_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     plugin_poll_parser_poll = plugin_poll_parser.add_argument_group("Polling")
     plugin_poll_parser_poll.add_argument("-si", "--single", action='store_true', help='Only poll for the cleartext export once')
+    plugin_poll_parser_poll.add_argument("-pp", "--poll-path", default=None, help="Custom path to look for an exported database, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search for %%APPDATA%%\\export.xml)")
+
 
     # parse_dump subparser
     parse_dump_parser = argparse.ArgumentParser(add_help=False)
