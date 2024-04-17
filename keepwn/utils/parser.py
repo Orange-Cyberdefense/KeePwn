@@ -33,7 +33,7 @@ def parse_args():
     trigger_check_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     trigger_check_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     trigger_check_parser_advanced = trigger_check_parser.add_argument_group("Advanced Configuration")
-    trigger_check_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file (if ommited, will search in default locations)")
+    trigger_check_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger add subparser
     trigger_add_parser = argparse.ArgumentParser(add_help=False)
     trigger_add_parser_target = trigger_add_parser.add_argument_group("Target")
@@ -44,7 +44,7 @@ def parse_args():
     trigger_add_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     trigger_add_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     trigger_add_parser_advanced = trigger_add_parser.add_argument_group("Advanced Configuration")
-    trigger_add_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file (if ommited, will search in default locations)")
+    trigger_add_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger remove subparser
     trigger_remove_parser = argparse.ArgumentParser(add_help=False)
     trigger_remove_parser_target = trigger_remove_parser.add_argument_group("Target")
@@ -55,7 +55,7 @@ def parse_args():
     trigger_remove_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     trigger_remove_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     trigger_remove_parser_advanced = trigger_remove_parser.add_argument_group("Advanced Configuration")
-    trigger_remove_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file (if ommited, will search in default locations)")
+    trigger_remove_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger poll subparser
     trigger_poll_parser = argparse.ArgumentParser(add_help=False)
     trigger_poll_parser_target = trigger_poll_parser.add_argument_group("Target")
@@ -67,6 +67,7 @@ def parse_args():
     trigger_poll_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     trigger_poll_parser_poll = trigger_poll_parser.add_argument_group("Polling")
     trigger_poll_parser_poll.add_argument("-si", "--single", action='store_true', help='Only poll for the cleartext export once')
+    trigger_poll_parser_poll.add_argument("-pp", "--poll-path", default=None, help="Custom path to look for an exported database, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search for %%APPDATA%%\\export.xml)")
 
     # plugin subparser
     plugin_parser = argparse.ArgumentParser(add_help=False)
@@ -235,7 +236,7 @@ def parse_mandatory_options(options):
             print_error("Could not open targets file '{}'.".format(options.targets_file))
             sys.exit(0)
 
-    share = 'C$'
+    share = 'C$' #TODO: add option to specify other shares
     domain = options.domain
     user = options.user
     password = options.password
@@ -268,3 +269,11 @@ def parse_mandatory_options(options):
         targets.append(target)
 
     return targets, share, domain, user, password, lm_hash, nt_hash
+
+def parse_remote_path(remote_path):
+    if remote_path.startswith('\\\\') and '$' in remote_path:
+        return remote_path.split('$')[1]
+    elif remote_path[1:3] == ':\\':
+        return remote_path.split(':')[1]
+    else:
+        return remote_path
