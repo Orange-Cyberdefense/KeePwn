@@ -406,7 +406,7 @@ def poll_trigger(options):
 
         smb_connection.deleteFile(share, export_path)
         relative_path = os.path.relpath(local_path, os.getcwd())
+        print_success("Moved remote export to {}".format(format_path('.' + os.sep + relative_path)))
     except:
         print_error("Unkown error while getting export.")
-
-    print_success("Moved remote export to {}".format(format_path('.' + os.sep + relative_path)))
+        exit()
