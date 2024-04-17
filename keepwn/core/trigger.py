@@ -42,10 +42,8 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
     if config_path_parameter:
         if config_path_parameter.startswith('\\\\') and '$' in config_path_parameter:
             config_path_parameter = config_path_parameter.split('$')[1]
-            print(config_path_parameter)
         if config_path_parameter[1:3] == ':\\':
             config_path_parameter = config_path_parameter.split(':')[1]
-            print(config_path_parameter)
         try:
             for file in smb_connection.listPath(share, config_path_parameter):
                 print_info("Found the specified KeePass configuration {}".format(format_path('\\\\{}{}'.format(share, config_path_parameter))))
