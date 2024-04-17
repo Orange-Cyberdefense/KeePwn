@@ -5,3 +5,4 @@ termcolor
 pefile
 python-magic
 pykeepass
+packaging
