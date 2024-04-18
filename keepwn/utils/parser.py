@@ -15,12 +15,14 @@ def parse_args():
     search_parser_targets = search_parser.add_argument_group("Target")
     search_parser_targets.add_argument("-t", "--target", default=None, help="IP address, range or hostname of the target machine")
     search_parser_targets.add_argument("-tf", "--targets-file", default=None, help="File containing a list of IP address, ranges or hostnames of target machines")
-    search_parser_targets.add_argument("-th", "--threads", default="5", help="Number of threads to use during remote search (1 per host, default: 5)")
     search_parser_auth = search_parser.add_argument_group("Authentication")
     search_parser_auth.add_argument("-d", "--domain", default='.', help='Windows domain name to authenticate to (if ommited, will perform local Windows authentication)')
     search_parser_auth.add_argument("-u", "--user", default=None, help='Username to authenticate to the remote machine')
     search_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     search_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
+    search_parser_advanced = search_parser.add_argument_group("Advanced Configuration")
+    search_parser_advanced.add_argument("-th", "--threads", default="5", help="Number of threads to use during remote search (1 per host, default: 5)")
+    search_parser_advanced.add_argument("-mp", "--max-depth", default="4", help="Max folder depth to search for KeePass local install (default: 5)")
 
     # trigger subparser
     trigger_parser = argparse.ArgumentParser(add_help=False)
@@ -270,6 +272,24 @@ def parse_mandatory_options(options):
         targets.remove(target)
     for target in targets_to_add:
         targets.append(target)
+
+    if not targets:
+        print_error("No target specified, exiting")
+        exit()
+
+    if options.threads:
+        try:
+            options.threads = int(options.threads)
+        except ValueError:
+            print_error("Please specify a valid number of threads")
+            exit()
+
+    if options.max_depth:
+        try:
+            options.max_depth = int(options.max_depth)
+        except ValueError:
+            print_error("Please specify a valid number of folder recursion depth")
+            exit()
 
     return targets, share, domain, user, password, lm_hash, nt_hash
 

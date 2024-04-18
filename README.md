@@ -12,7 +12,7 @@
 - [x] KeePass Discovery
   - [x] Accept multiple target sources (IP, range, hostname, file)
   - [x] Automatically look for KeePass global installation files via SMB C$ share.
-  - [ ] Automatically look for KeePass portable + Windows store installation files via SMB C$ share.
+  - [x] Automatically look for KeePass portable via SMB C$ share.
   - [ ] Automatically check for running KeePass process through Impacket-based command execution.
   - [x] Multi-thread implementation to avoid bottleneck hosts.
   - [x] Automatically check for KeePass binary's metadata (version, last access time).

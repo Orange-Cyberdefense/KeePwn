@@ -83,6 +83,29 @@ def print_found_plugins(plugins):
 def format_path(path):
     return colored("'" + path + "'", "blue")
 
+
+def display_smb_error(error, target, multiple_display=False):
+    str_error = str(error)
+    if 'Errno' in str_error:
+        print_error_target(target, str_error.split('] ')[-1].capitalize())
+    elif 'SMB' in str_error:
+        if 'STATUS_ACCESS_DENIED' in str_error:
+            if multiple_display:
+                print_error_target(target, str_error.split('(')[0] + ', are you sure that you have admin rights on the host?')
+            else:
+                print_error(str_error.split('(')[0] + ', are you sure that you have admin rights on the host?')
+        else:
+            if multiple_display:
+                print_error_target(target, str_error.split('(')[0])
+            else:
+                print_error(str_error.split('(')[0])
+    else:
+        if multiple_display:
+            print_error_target(target, "Unknown error while connecting to target: {}".format(str_error))
+        else:
+            print_error("Unknown error while connecting to target: {}".format(str_error))
+    return
+
 class Loader: # taken from https://stackoverflow.com/questions/22029562/python-how-to-make-simple-animated-loading-while-process-is-running
     def __init__(self, desc="", end="", timeout=0.05):
         """
