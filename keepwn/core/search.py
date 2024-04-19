@@ -10,19 +10,19 @@ from termcolor import colored
 
 from keepwn.core.trigger import read_config_file
 from keepwn.utils.logging import print_error_target, print_debug_target, format_path, print_success_target, print_error, print_info, display_smb_error
-from keepwn.utils.parser import parse_mandatory_options
+from keepwn.utils.parser import parse_mandatory_options, parse_search_integers
 from keepwn.utils.smb import smb_connect
-
 
 def search(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
+    threads, max_depth = parse_search_integers(options)
 
     if len(targets) == 1:
-        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, options.max_depth)
+        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth)
     else:
-        print_info("Starting remote KeePass search with {} threads".format(options.threads))
-        with concurrent.futures.ThreadPoolExecutor(max_workers=options.threads) as executor:
-            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(options.max_depth))
+        print_info("Starting remote KeePass search with {} threads".format(threads))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
+            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth))
 
 
 def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth):

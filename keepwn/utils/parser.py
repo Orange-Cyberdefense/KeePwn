@@ -277,21 +277,27 @@ def parse_mandatory_options(options):
         print_error("No target specified, exiting")
         exit()
 
+    return targets, share, domain, user, password, lm_hash, nt_hash
+
+
+def parse_search_integers(options):
+    threads = None
+    max_depth = None
     if options.threads:
         try:
-            options.threads = int(options.threads)
+            threads = int(options.threads)
         except ValueError:
             print_error("Please specify a valid number of threads")
             exit()
 
     if options.max_depth:
         try:
-            options.max_depth = int(options.max_depth)
+            max_depth = int(options.max_depth)
         except ValueError:
             print_error("Please specify a valid number of folder recursion depth")
             exit()
 
-    return targets, share, domain, user, password, lm_hash, nt_hash
+    return threads, max_depth
 
 def parse_remote_path(remote_path):
     if remote_path.startswith('\\\\') and '$' in remote_path:
