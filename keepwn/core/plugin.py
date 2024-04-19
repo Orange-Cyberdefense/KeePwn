@@ -6,7 +6,8 @@ from time import sleep
 
 from impacket.smbconnection import SessionError
 
-from keepwn.utils.logging import print_error, print_info, print_success, print_warning, print_found_plugins, Loader, format_path
+from keepwn.utils.logging import print_error, print_info, print_success, print_warning, print_found_plugins, Loader, \
+    format_path, display_smb_error
 from keepwn.utils.parser import parse_mandatory_options, parse_remote_path
 from keepwn.utils.smb import smb_connect
 
@@ -49,13 +50,7 @@ def check_plugin(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     if options.plugin_path:
@@ -92,13 +87,7 @@ def add_plugin(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     if options.plugin_path:
@@ -159,13 +148,7 @@ def clean_plugin(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     if options.plugin_path:
@@ -221,13 +204,7 @@ def poll_plugin(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     #TODO: refactor in function to avoid code duplication (single/multiple poll + trigger/plugin poll)

@@ -10,7 +10,8 @@ from lxml import etree
 from impacket.smbconnection import SessionError
 from termcolor import cprint, colored
 
-from keepwn.utils.logging import print_error, print_info, print_success, Loader, format_path, print_warning
+from keepwn.utils.logging import print_error, print_info, print_success, Loader, format_path, print_warning, \
+    display_smb_error
 from keepwn.utils.parser import parse_mandatory_options, parse_remote_path
 from keepwn.utils.smb import smb_connect
 from packaging.version import Version
@@ -143,13 +144,7 @@ def check_trigger(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     if options.config_path:
@@ -176,13 +171,7 @@ def add_trigger(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     # we first look for keepass version, to prevent the user from screwing its penetration test engagement :D
@@ -250,13 +239,7 @@ def clean_trigger(options):
     target = targets[0]
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     if options.config_path:
@@ -310,13 +293,7 @@ def poll_trigger(options):
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
 
     if error or not smb_connection:
-        str_error = str(error)
-        if 'Errno' in str_error:
-            print_error(str_error.split('] ')[-1].capitalize())
-        elif 'SMB' in str_error:
-            print_error(str_error.split('(')[0])
-        else:
-            print_error('Unkown error while connecting to target: {}'.format(str_error))
+        display_smb_error(error, target, False)
         return
 
     export_path = None
