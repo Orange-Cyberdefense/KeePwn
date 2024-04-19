@@ -14,8 +14,12 @@ def main():
     if os.name == 'nt':
         os.system('color')  # to make termcolor work on Windows
 
-    print(banner)
     options = parse_args()
+
+    if not options.no_banner:
+        print("banner!")
+        print(banner)
+
     # calls the appropriate core function
     if options.mode == 'search':
         search(options)

@@ -12,6 +12,7 @@ def parse_args():
 
     # search subparser
     search_parser = argparse.ArgumentParser(add_help=False)
+    search_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     search_parser_targets = search_parser.add_argument_group("Target")
     search_parser_targets.add_argument("-t", "--target", default=None, help="IP address, range or hostname of the target machine")
     search_parser_targets.add_argument("-tf", "--targets-file", default=None, help="File containing a list of IP address, ranges or hostnames of target machines")
@@ -28,6 +29,7 @@ def parse_args():
     trigger_parser = argparse.ArgumentParser(add_help=False)
     # trigger check subparser
     trigger_check_parser = argparse.ArgumentParser(add_help=False)
+    trigger_check_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     trigger_check_parser_target = trigger_check_parser.add_argument_group("Target")
     trigger_check_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     trigger_check_parser_auth = trigger_check_parser.add_argument_group("Authentication")
@@ -39,6 +41,7 @@ def parse_args():
     trigger_check_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger add subparser
     trigger_add_parser = argparse.ArgumentParser(add_help=False)
+    trigger_add_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     trigger_add_parser_target = trigger_add_parser.add_argument_group("Target")
     trigger_add_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     trigger_add_parser_auth = trigger_add_parser.add_argument_group("Authentication")
@@ -50,6 +53,7 @@ def parse_args():
     trigger_add_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger remove subparser
     trigger_remove_parser = argparse.ArgumentParser(add_help=False)
+    trigger_remove_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     trigger_remove_parser_target = trigger_remove_parser.add_argument_group("Target")
     trigger_remove_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     trigger_remove_parser_auth = trigger_remove_parser.add_argument_group("Authentication")
@@ -61,6 +65,7 @@ def parse_args():
     trigger_remove_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger poll subparser
     trigger_poll_parser = argparse.ArgumentParser(add_help=False)
+    trigger_poll_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     trigger_poll_parser_target = trigger_poll_parser.add_argument_group("Target")
     trigger_poll_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     trigger_poll_parser_auth = trigger_poll_parser.add_argument_group("Authentication")
@@ -76,6 +81,7 @@ def parse_args():
     plugin_parser = argparse.ArgumentParser(add_help=False)
     # plugin check subparser
     plugin_check_parser = argparse.ArgumentParser(add_help=False)
+    plugin_check_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     plugin_check_parser_target = plugin_check_parser.add_argument_group("Target")
     plugin_check_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     plugin_check_parser_auth = plugin_check_parser.add_argument_group("Authentication")
@@ -87,6 +93,7 @@ def parse_args():
     plugin_check_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # plugin add subparser
     plugin_add_parser = argparse.ArgumentParser(add_help=False)
+    plugin_add_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     plugin_add_parser_target = plugin_add_parser.add_argument_group("Target")
     plugin_add_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     plugin_add_parser_auth = plugin_add_parser.add_argument_group("Authentication")
@@ -99,6 +106,7 @@ def parse_args():
     plugin_add_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # plugin remove subparser
     plugin_remove_parser = argparse.ArgumentParser(add_help=False)
+    plugin_remove_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     plugin_remove_parser_target = plugin_remove_parser.add_argument_group("Target")
     plugin_remove_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     plugin_remove_parser_auth = plugin_remove_parser.add_argument_group("Authentication")
@@ -111,6 +119,7 @@ def parse_args():
     plugin_remove_parser_advanced.add_argument("-pp", "--plugin-path", default=None, help="Path of the remote plugin directory, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # plugin poll subparser
     plugin_poll_parser = argparse.ArgumentParser(add_help=False)
+    plugin_poll_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     plugin_poll_parser_target = plugin_poll_parser.add_argument_group("Target")
     plugin_poll_parser_target.add_argument("-t", "--target", default=None, help="IP address or hostname of the target machine")
     plugin_poll_parser_auth = plugin_poll_parser.add_argument_group("Authentication")
@@ -125,11 +134,13 @@ def parse_args():
 
     # parse_dump subparser
     parse_dump_parser = argparse.ArgumentParser(add_help=False)
+    parse_dump_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     parse_dump_parser.add_argument("-d", "--dump_file", default=None, help="Path of the memory dump to parse")
     parse_dump_parser.add_argument("-b", "--bruteforce", default=None, help="Database to bruteforce")
 
     #convert subparser
     convert_parser = argparse.ArgumentParser(add_help=False)
+    convert_parser.add_argument("-nb", "--no-banner", action='store_true', help="Hide KeePwn banner")
     convert_parser.add_argument("-d", "--database_path", default=None, help="Path of the KDBX database to convert")
     convert_parser.add_argument("-t", "--hash_type", default='hashcat', help="Output hash type : 'hashcat' (default) or 'john'")
     convert_parser.add_argument("-o", "--output_file", default=None, help="Path to output file hash (optionnal)")
