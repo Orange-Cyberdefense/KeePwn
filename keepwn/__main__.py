@@ -17,7 +17,6 @@ def main():
     options = parse_args()
 
     if not options.no_banner:
-        print("banner!")
         print(banner)
 
     # calls the appropriate core function
