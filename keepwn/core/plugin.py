@@ -14,21 +14,20 @@ from keepwn.utils.smb import smb_connect
 
 def get_plugin_folder_path(smb_connection, share, plugin_path):
     if plugin_path:
-        if not plugin_path.endswith('Plugins'):
+        if 'plugin' not in plugin_path.lower():
             print_warning("Specified path does not look like a plugin path, do you want to use it [y/n]")
             ans = input('> ')
             if ans.lower() not in ['y', 'yes', '']:
                 exit()
     else:
-        print_info("No KeePass Plugins path specified, searching in default locations..")
+        print_info("No path specified, searching in default locations..")
         plugin_path = '\\Program Files\\KeePass Password Safe 2\\Plugins\\'
     try:
         smb_connection.listPath(share, plugin_path)
     except SessionError as e:
-        print_error("Unable to find KeePass plugin folder")
         return None
-    print_info("Found KeePass Plugins directory {}".format(format_path('\\\\{}{}'.format(share, plugin_path))))
     return plugin_path
+
 
 def get_plugins(smb_connection, share, plugin_path):
     if not plugin_path.endswith('\\*'):
@@ -44,6 +43,26 @@ def get_plugins(smb_connection, share, plugin_path):
         return None
     return plugins
 
+
+def get_cached_plugins(smb_connection, share):
+    cached_plugins = {}
+    try:
+        for file in smb_connection.listPath(share, '\\Users\\*'):
+            if file.is_directory():
+                try:
+                    path = '\\Users\\{}\\AppData\\Roaming\\KeePass\\PluginCache\\*'.format(file.get_longname())
+                    plugins = smb_connection.listPath(share, path)
+                    cached_plugins[path] = []
+                    for plugin in plugins:
+                        if plugin.get_longname() not in ['.', '..']:
+                            cached_plugins[path].append(plugin.get_longname())
+                except SessionError as e:
+                    pass  # the file was not found
+    except SessionError as e:
+        pass  # the file was not found
+    return cached_plugins
+
+
 def check_plugin(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     target = targets[0]
@@ -57,14 +76,18 @@ def check_plugin(options):
         custom_plugin_path = parse_remote_path(options.plugin_path)
     else:
         custom_plugin_path = None
-    plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
 
+    plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
     if not plugin_folder_path:
+        print_error("Unable to find KeePass plugin folder")
         return
 
     plugins = get_plugins(smb_connection, share, plugin_folder_path)
-    print_found_plugins(plugins)
-    return
+    print_found_plugins(plugins, share, plugin_folder_path)
+    cached_plugins = get_cached_plugins(smb_connection, share)
+
+    for path in cached_plugins:
+        print_found_plugins(cached_plugins[path], share, path)
 
 def add_plugin(options):
 
@@ -94,7 +117,14 @@ def add_plugin(options):
         custom_plugin_path = parse_remote_path(options.plugin_path)
     else:
         custom_plugin_path = None
+
     plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
+    if plugin_folder_path:
+        print_info("Found KeePass Plugins directory {}".format(format_path('\\\\{}{}'.format(share, plugin_folder_path))))
+    else:
+        print_error("Unable to add plugin (folder does not exist?)")
+        return
+
     plugin_file = Path(options.plugin).name
 
     found_plugin = False
@@ -155,7 +185,14 @@ def clean_plugin(options):
         custom_plugin_path = parse_remote_path(options.plugin_path)
     else:
         custom_plugin_path = None
+
     plugin_folder_path = get_plugin_folder_path(smb_connection, share, custom_plugin_path)
+    if plugin_folder_path:
+        print_info(
+            "Found KeePass Plugins directory {}".format(format_path('\\\\{}{}'.format(share, plugin_folder_path))))
+    else:
+        return
+
     plugin_file = Path(options.plugin).name
 
     found_plugin = False

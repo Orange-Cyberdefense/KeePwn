@@ -67,18 +67,18 @@ def print_debug_target(target, string):
     cprint("]", attrs=["bold"], end=" ")
     print(string)
 
-def print_found_plugins(plugins):
-    cprint("[", attrs=["bold"], end="")
-    cprint("*", "blue", attrs=["bold"], end="")
-    cprint("]", attrs=["bold"], end=" ")
+def print_found_plugins(plugins, share, plugin_folder_path):
     if plugins:
-        print("Found the following plugins: ", end="")
-        for plugin in plugins[:-1]:
-            cprint(plugin, 'yellow', end="")
-            print(', ', end="")
-        cprint(plugins[-1], 'yellow')
+        message = 'Found '
+        for i, plugin in enumerate(plugins):
+            message += colored(plugin, 'yellow')
+            if len(plugin) > 1 and i < len(plugins)-1:
+                message += ', '
+        message += ' in folder {}'.format(format_path('\\\\{}{}'.format(share, plugin_folder_path)))
+        print_info(message)
     else:
-        print("No plugin found.")
+        print_info("No plugin found in {}".format(format_path('\\\\{}{}'.format(share, plugin_folder_path))))
+
 
 def format_path(path):
     return colored("'" + path + "'", "blue")
