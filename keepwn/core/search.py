@@ -64,7 +64,7 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
         print_success_target(target, "Found keepass configuration files but no KeePass.exe, you may increase --max-depth to find portable installation")
 
     for config_file in config_files:
-        print_success_target(target, 'Found configuration file ' + colored(('\\\\' + share + config_file + "'"), "blue"))
+        print_success_target(target, "Found " + colored(('\'\\\\' + share + config_file + "'"), "blue"))
 
     if keepass_process:
         message = get_process_display(share, keepass_process, keepass_user, keepass_pid)
@@ -97,6 +97,7 @@ def search_local_path(share, smb_connection, max_depth):
 
 
 def search_config_file(share, smb_connection):
+    # TODO: parse config file to find .kdbx
     config_paths = []
     try:
         for file in smb_connection.listPath(share, '\\Users\\*'):
@@ -161,7 +162,7 @@ def get_found_display(share, path, version, last_update_check):
             else:
                 last_update_check_message = '{} minutes ago'.format((difference.seconds // 60) % 60)
 
-    message = "Found KeePass binary {} ".format(format_path('\\\\{}{}'.format(share, path)))
+    message = "Found {} ".format(format_path('\\\\{}{}'.format(share, path)))
     message += colored("(Version: ", "cyan")
     message += colored(version_message, "yellow") + ', '
     message += colored("LastUpdateCheck: ", "cyan")
