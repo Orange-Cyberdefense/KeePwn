@@ -41,7 +41,7 @@
 ```
 git clone https://github.com/Orange-Cyberdefense/KeePwn
 cd KeePwn
-sudo python3 setup.py install
+python3 -m pip install .
 KeePwn --help
 ```
 
