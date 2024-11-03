@@ -9,24 +9,28 @@ from lxml import etree
 from termcolor import colored
 
 from keepwn.core.trigger import read_config_file
-from keepwn.utils.logging import print_error_target, print_debug_target, format_path, print_success_target, print_error, print_info, display_smb_error
+from keepwn.utils.logging import print_info_target, print_debug_target, format_path, print_success_target, print_info, display_smb_error
 from keepwn.utils.parser import parse_mandatory_options, parse_search_integers
 from keepwn.utils.smb import smb_connect
+from keepwn.utils.tstools import TSHandler
+
 
 def search(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     threads, max_depth = parse_search_integers(options)
+    get_process = options.get_process
 
     if len(targets) == 1:
-        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth)
+        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process)
     else:
         print_info("Starting remote KeePass search with {} threads".format(threads))
         with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
             executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth))
 
 
-def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth):
-    # TODO: add option to check for running KeePass process through RPC, see https://github.com/fortra/impacket/blob/master/examples/tstool.py
+def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process):
+
+    keepass_exe, version, keepass_process, keepass_pid, keepass_user = None, None, None, None, None
 
     # admin connection to target
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
@@ -45,17 +49,35 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
     if config_files and not keepass_exe:
         keepass_exe = search_local_path(share, smb_connection, max_depth)
 
-    # display results
     if keepass_exe:
         version = get_keepass_version(share, smb_connection, keepass_exe)
+
+    # search for keepass process if required by the user
+    if get_process:
+        keepass_process, keepass_pid, keepass_user = search_keepass_process(smb_connection, target)
+
+    # display results
+    if keepass_exe:
         display_message = get_found_display(share, keepass_exe, version, last_update_time)
         print_success_target(target, display_message)
-        return
-    elif config_files:  # edge case
-        print_success_target(target, "Found keepass configuration files in {} but no KeePass.exe, you may increase --max-depth to find portable installation".format(format_path('%APPDATA%\Roaming\KeePass\KeePass.config.xml')))
-        return
+    elif config_files:
+        print_success_target(target, "Found keepass configuration files but no KeePass.exe, you may increase --max-depth to find portable installation")
 
-    print_debug_target(target, "No KeePass-related file found")
+    for config_file in config_files:
+        print_success_target(target, 'Found configuration file ' + colored(('\\\\' + share + config_file + "'"), "blue"))
+
+    if keepass_process:
+        message = get_process_display(share, keepass_process, keepass_user, keepass_pid)
+        print_success_target(target, message)
+
+    if get_process and (keepass_exe or config_files) and not keepass_process:
+        # if process is not running, only displays message if keepass-related files were found on the target (to prevent flooding output)
+        print_info_target(target, "No running KeePass process found")
+
+    if get_process and not (keepass_exe or config_files or keepass_process):
+        print_debug_target(target, "No KeePass-related file or process found")
+    elif not (keepass_exe or config_files):
+        print_debug_target(target, "No KeePass-related file found")
 
 
 def search_global_path(share, smb_connection):
@@ -139,7 +161,7 @@ def get_found_display(share, path, version, last_update_check):
             else:
                 last_update_check_message = '{} minutes ago'.format((difference.seconds // 60) % 60)
 
-    message = "Found {} ".format(format_path('\\\\{}{}'.format(share, path)))
+    message = "Found KeePass binary {} ".format(format_path('\\\\{}{}'.format(share, path)))
     message += colored("(Version: ", "cyan")
     message += colored(version_message, "yellow") + ', '
     message += colored("LastUpdateCheck: ", "cyan")
@@ -148,6 +170,14 @@ def get_found_display(share, path, version, last_update_check):
 
     return message
 
+def get_process_display(share, keepass_process, keepass_user, keepass_pid):
+    message = "Found running "
+    message += colored("{}".format(keepass_process), 'blue') + " process "
+    message += colored("(User: ", "cyan")
+    message += colored("{}".format(keepass_user), "yellow") + ', '
+    message += colored("PID: ", "cyan") + colored("{}".format(keepass_pid), "yellow")
+    message += colored(")", "cyan")
+    return message
 
 def recursive_folder_search(share, smb_connection, current_path, current_depth, max_depth):
     # Base case: If the current depth exceeds the maximum depth, return None
@@ -165,8 +195,8 @@ def recursive_folder_search(share, smb_connection, current_path, current_depth, 
                 try:
                     for sub_file in smb_connection.listPath(share, current_path[:-1] + file.get_longname() + '\\KeePass.exe'):
                         return current_path[:-1] + file.get_longname() + '\\KeePass.exe'
-                except SessionError as e:  # the file was not found
-                    pass
+                except SessionError as e:
+                    print_info("Found folder {}".format(format_path(current_path[:-1] + file.get_longname())))
             # launch new recursive search (excludes current and upper folders)
             if file.is_directory() and (file.get_longname() not in ['.', '..']):
                 result = recursive_folder_search(share, smb_connection, current_path[:-1] + file.get_longname() + '\\*', current_depth + 1, max_depth)
@@ -176,3 +206,15 @@ def recursive_folder_search(share, smb_connection, current_path, current_depth, 
         return None
 
     return None
+
+def search_keepass_process(smb_connection, target):
+    tsHandler = TSHandler(smb_connection, target,None)
+    keepass_process = None
+    keepass_pid = None
+    keepass_user = None
+
+    try:
+        keepass_process, keepass_pid, keepass_user = tsHandler.get_proc_info('keepass')
+    except Exception as e:
+        print(e)
+    return keepass_process, keepass_pid, keepass_user
