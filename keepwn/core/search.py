@@ -2,6 +2,7 @@ import concurrent.futures
 from datetime import datetime
 from itertools import repeat
 from io import BytesIO
+import csv
 
 import pefile
 from impacket.smbconnection import SessionError
@@ -19,17 +20,17 @@ def search(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     threads, max_depth = parse_search_integers(options)
     get_process = options.get_process
+    output = options.output
 
     if len(targets) == 1:
-        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process)
+        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output)
     else:
         print_info("Starting remote KeePass search with {} threads".format(threads))
         with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth))
+            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output))
 
 
-def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process):
-
+def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output):
     keepass_exe, version, keepass_process, keepass_pid, keepass_user = None, None, None, None, None
 
     # admin connection to target
@@ -78,6 +79,28 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
         print_debug_target(target, "No KeePass-related file or process found")
     elif not (keepass_exe or config_files):
         print_debug_target(target, "No KeePass-related file found")
+
+    if output:
+        with open(output, 'w', newline='') as file: # todo catch error here (path does not exists, is not writable, etc)
+            writer = csv.writer(file)
+            header = ["host", "keepass_binary", "keepass_config", "keepass_process"]
+            writer.writerow(header)
+            fields = [target]
+            if keepass_exe:
+                fields.append('"{}" (Version: {}; LastUpdateTime: {})'.format(keepass_exe, version, last_update_time)) # TODO fix quotes
+            else:
+                fields.append("Not Found")
+
+            if config_files:
+                fields.append("; ".join(map(str, config_files))) # TODO quotes
+            else:
+                fields.append("Not Found")
+
+            if keepass_process:
+                fields.append("{} (User: {}, PID: {})".format(keepass_process, keepass_user, keepass_pid))
+            else:
+                fields.append("Not Found")
+            writer.writerow(fields)
 
 
 def search_global_path(share, smb_connection):
