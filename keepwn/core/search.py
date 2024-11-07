@@ -3,6 +3,7 @@ from datetime import datetime
 from itertools import repeat
 from io import BytesIO
 import csv
+from pathlib import Path
 
 import pefile
 from impacket.smbconnection import SessionError
@@ -22,6 +23,18 @@ def search(options):
     get_process = options.get_process
     output = options.output
 
+    if output:
+        try:
+            with open(output, 'w', newline='') as file:
+                writer = csv.writer(file, delimiter=',', quotechar="'")
+                header = ["host", "keepass_binary", "keepass_binary_version", "keepass_binary_last_update_time", "keepass_config"]
+                if get_process:
+                    header.extend(["keepass_process", "keepass_process_user", "keepass_process_pid"])
+                writer.writerow(header)
+        except Exception as e:
+            print("Error writing output to file {}: {}".format(output, e))
+            exit(1)
+
     if len(targets) == 1:
         search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output)
     else:
@@ -29,6 +42,11 @@ def search(options):
         with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
             executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output))
 
+    if output:
+        if Path(output).exists():
+            print("\nSearch results logged to {}".format(output))
+        else:
+            print("\nError writing results to {}".format(output))
 
 def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output):
     keepass_exe, version, keepass_process, keepass_pid, keepass_user = None, None, None, None, None
@@ -81,26 +99,7 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
         print_debug_target(target, "No KeePass-related file found")
 
     if output:
-        with open(output, 'w', newline='') as file: # todo catch error here (path does not exists, is not writable, etc)
-            writer = csv.writer(file)
-            header = ["host", "keepass_binary", "keepass_config", "keepass_process"]
-            writer.writerow(header)
-            fields = [target]
-            if keepass_exe:
-                fields.append('"{}" (Version: {}; LastUpdateTime: {})'.format(keepass_exe, version, last_update_time)) # TODO fix quotes
-            else:
-                fields.append("Not Found")
-
-            if config_files:
-                fields.append("; ".join(map(str, config_files))) # TODO quotes
-            else:
-                fields.append("Not Found")
-
-            if keepass_process:
-                fields.append("{} (User: {}, PID: {})".format(keepass_process, keepass_user, keepass_pid))
-            else:
-                fields.append("Not Found")
-            writer.writerow(fields)
+        write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_process, keepass_user, keepass_pid)
 
 
 def search_global_path(share, smb_connection):
@@ -242,3 +241,43 @@ def search_keepass_process(smb_connection, target):
     except Exception as e:
         print(e)
     return keepass_process, keepass_pid, keepass_user
+
+def write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_process, keepass_user, keepass_pid):
+    with open(output, 'a', newline='') as file:
+        writer = csv.writer(file, delimiter=',', quotechar="'")
+
+        fields = [target]
+        if keepass_exe:
+            fields.append('"\\\\{}{}"'.format(share, keepass_exe))
+        else:
+            fields.append("Not Found")
+        if version:
+            fields.append(version)
+        else:
+            fields.append("Not Found")
+        if last_update_time:
+            fields.append(last_update_time)
+        else:
+            fields.append("Not Found")
+        if config_files:
+            if len(config_files) == 1:
+                fields.append('"\\\\{}{}"'.format(share, config_files[0]))
+            else:
+                fields.append("; ".join(f'"\\\\{share}{config_file}"' for config_file in config_files))
+        else:
+            fields.append("Not Found")
+        if get_process:
+            if keepass_process:
+                fields.append("{}".format(keepass_process))
+            else:
+                fields.append("Not Found")
+            if keepass_user:
+                fields.append("{}".format(keepass_user))
+            else:
+                fields.append("Not Found")
+            if keepass_pid:
+                fields.append("{}".format(keepass_pid))
+            else:
+                fields.append("Not Found")
+
+        writer.writerow(fields)
