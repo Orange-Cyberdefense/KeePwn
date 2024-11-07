@@ -50,8 +50,9 @@ def get_cached_plugins(smb_connection, share):
         for file in smb_connection.listPath(share, '\\Users\\*'):
             if file.is_directory():
                 try:
-                    path = '\\Users\\{}\\AppData\\Roaming\\KeePass\\PluginCache\\*'.format(file.get_longname())
-                    plugins = smb_connection.listPath(share, path)
+                    path = '\\Users\\{}\\AppData\\Local\\KeePass\\PluginCache'.format(file.get_longname())
+                    smb_path = path + '\\*'
+                    plugins = smb_connection.listPath(share, smb_path)
                     cached_plugins[path] = []
                     for plugin in plugins:
                         if plugin.get_longname() not in ['.', '..']:
