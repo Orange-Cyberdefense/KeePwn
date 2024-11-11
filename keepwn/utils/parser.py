@@ -254,7 +254,7 @@ def parse_mandatory_options(options):
             print_error("Could not open targets file '{}'.".format(options.targets_file))
             sys.exit(0)
 
-    share = 'C$' #TODO: add option to specify other shares
+    share = 'C$'
     domain = options.domain
     user = options.user
     password = options.password
