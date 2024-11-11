@@ -9,10 +9,6 @@ from keepwn.utils.logging import print_error
 VERSION = "0.4"
 BANNER = "KeePwn v{} - by Julien BEDEL (@d3lb3_)".format(VERSION)
 
-class SmartFormatter(argparse.HelpFormatter):
-
-    def _split_lines(self, text, width):
-        return text.splitlines()
 
 def parse_args():
     main_parser = argparse.ArgumentParser(add_help=True, description='Automate KeePass discovery and secret extraction.')
