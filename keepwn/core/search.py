@@ -50,7 +50,7 @@ def search(options):
             print_error("Error writing results to {}".format(output))
 
 def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output):
-    keepass_exe, version, keepass_process, keepass_pid, keepass_user = None, None, None, None, None
+    keepass_exe, version, keepass_processes, keepass_pid, keepass_user = None, None, None, None, None
 
     # admin connection to target
     smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
@@ -74,7 +74,7 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
 
     # search for keepass process if required by the user
     if get_process:
-        keepass_process, keepass_pid, keepass_user = search_keepass_process(smb_connection, target)
+        keepass_processes = search_keepass_process(smb_connection, target)
 
     # display results
     if keepass_exe:
@@ -86,21 +86,22 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
     for config_file in config_files:
         print_success_target(target, "Found " + colored(('\'\\\\' + share + config_file + "'"), "blue"))
 
-    if keepass_process:
-        message = get_process_display(share, keepass_process, keepass_user, keepass_pid)
+    for keepass_process in keepass_processes:
+        keepass_process_name, keepass_pid, keepass_user  = keepass_process
+        message = get_process_display(share, keepass_process_name, keepass_user, keepass_pid)
         print_success_target(target, message)
 
-    if get_process and (keepass_exe or config_files) and not keepass_process:
+    if get_process and (keepass_exe or config_files) and not keepass_processes:
         # if process is not running, only displays message if keepass-related files were found on the target (to prevent flooding output)
         print_info_target(target, "No running KeePass process found")
 
-    if get_process and not (keepass_exe or config_files or keepass_process):
+    if get_process and not (keepass_exe or config_files or keepass_processes):
         print_debug_target(target, "No KeePass-related file or process found")
     elif not (keepass_exe or config_files):
         print_debug_target(target, "No KeePass-related file found")
 
     if output:
-        write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_process, keepass_user, keepass_pid)
+        write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_processes)
 
 
 def search_global_path(share, smb_connection):
@@ -233,17 +234,15 @@ def recursive_folder_search(share, smb_connection, current_path, current_depth, 
 
 def search_keepass_process(smb_connection, target):
     tsHandler = TSHandler(smb_connection, target,None)
-    keepass_process = None
-    keepass_pid = None
-    keepass_user = None
+    keepass_processes = None
 
     try:
-        keepass_process, keepass_pid, keepass_user = tsHandler.get_proc_info('keepass')
+        keepass_processes = tsHandler.get_proc_info('keepass')
     except Exception as e:
         print(e)
-    return keepass_process, keepass_pid, keepass_user
+    return keepass_processes
 
-def write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_process, keepass_user, keepass_pid):
+def write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_processes):
     with open(output, 'a', newline='') as file:
         writer = csv.writer(file, delimiter=',', quotechar="'")
 
@@ -268,17 +267,20 @@ def write_output(output, share, target, keepass_exe, version, last_update_time, 
         else:
             fields.append("Not Found")
         if get_process:
-            if keepass_process:
-                fields.append("{}".format(keepass_process))
-            else:
-                fields.append("Not Found")
-            if keepass_user:
-                fields.append("{}".format(keepass_user))
-            else:
-                fields.append("Not Found")
-            if keepass_pid:
-                fields.append("{}".format(keepass_pid))
-            else:
-                fields.append("Not Found")
+            keepass_processes_names = [inner_array[0] for inner_array in keepass_processes]
+            keepass_users = [inner_array[1] for inner_array in keepass_processes]
+            keepass_pids = [inner_array[2] for inner_array in keepass_processes]
+
+            ordered_processes_infos = [keepass_processes_names, keepass_pids, keepass_users]
+            for process_info in ordered_processes_infos:
+                if process_info:
+                    if len(process_info) == 1:
+                        fields.append("{}".format(process_info[0]))
+                    else:
+                        fields.append("; ".join("{}".format(process_info) for process_info in process_info))
+                else:
+                    fields.append("Not Found")
+
+
 
         writer.writerow(fields)

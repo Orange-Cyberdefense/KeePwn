@@ -88,8 +88,9 @@ class TSHandler:
 
 
     def get_proc_info(self, process_name):
+        process_list = []
         tasks = self.get_tasklist()
         for task in tasks:
             if process_name in task['ImageName'].lower():
-                return task['ImageName'], task['UniqueProcessId'], self.sidToUser(task['pSid'])
-        return None, None, None
+                process_list.append([task['ImageName'], task['UniqueProcessId'], self.sidToUser(task['pSid'])])
+        return process_list
