@@ -14,9 +14,6 @@ def main():
 
     options = parse_args()
 
-    #if options.version:
-    #    print(banner)
-
     if options.mode:
         print()
 
