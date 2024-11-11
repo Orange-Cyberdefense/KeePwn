@@ -7,8 +7,6 @@ from keepwn.core.search import search
 from keepwn.core.trigger import check_trigger, add_trigger, clean_trigger, poll_trigger
 from keepwn.utils.parser import parse_args
 
-VERSION = "0.4"
-banner = "KeePwn v{} - by Julien BEDEL (@d3lb3_)\n".format(VERSION)
 
 def main():
     if os.name == 'nt':
@@ -16,8 +14,11 @@ def main():
 
     options = parse_args()
 
-    if not options.no_banner:
-        print(banner)
+    #if options.version:
+    #    print(banner)
+
+    if options.mode:
+        print()
 
     # calls the appropriate core function
     if options.mode == 'search':
