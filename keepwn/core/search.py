@@ -12,17 +12,24 @@ from termcolor import colored
 
 from keepwn.core.trigger import read_config_file
 from keepwn.utils.logging import print_info_target, print_debug_target, format_path, print_success_target, print_info, print_error, print_success, display_smb_error
-from keepwn.utils.parser import parse_mandatory_options, parse_search_integers
+from keepwn.utils.parser import parse_mandatory_options
 from keepwn.utils.smb import smb_connect
 from keepwn.utils.tstools import TSHandler
 
 
 def search(options):
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
-    threads, max_depth = parse_search_integers(options)
+    #threads, max_depth, timeout = parse_search_integers(options)
+    threads = options.threads
+    max_depth = options.max_depth
+    timeout = options.timeout
     get_process = options.get_process
     output = options.output
     found_only = options.found_only
+    if options.timeout:
+        timeout = options.timeout
+    else:
+        timeout = 2
 
     if output:
         try:
@@ -37,11 +44,11 @@ def search(options):
             exit(1)
 
     if len(targets) == 1:
-        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output, found_only)
+        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output, found_only, timeout)
     else:
         print_info("Starting remote KeePass search with {} threads\n".format(threads))
         with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output), repeat(found_only))
+            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output), repeat(found_only), repeat(timeout))
 
     if output:
         print('')
@@ -51,11 +58,11 @@ def search(options):
             print_error("Error writing results to {}".format(output))
 
 
-def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output, found_only):
+def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output, found_only, timeout):
     keepass_exe, version, keepass_processes, keepass_pid, keepass_user = None, None, None, None, None
 
     # admin connection to target
-    smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash)
+    smb_connection, error = smb_connect(target, share, user, password, domain, lm_hash, nt_hash, timeout)
     if error or not smb_connection:
         display_smb_error(error, target, True)
         return

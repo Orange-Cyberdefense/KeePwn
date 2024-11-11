@@ -28,8 +28,9 @@ def parse_args():
     search_parser_advanced.add_argument("-gp", "--get-process", action='store_true', help='Checks if KeePass process is running on the target using RPC')
     search_parser_advanced.add_argument("-fo", "--found-only", action='store_true', help='Only displays information about hosts where KeePass is found')
     search_parser_advanced.add_argument("-o", "--output", default=None, help='Output file to store results in CSV format')
-    search_parser_advanced.add_argument("-th", "--threads", default="5", help="Number of threads to use during remote search (1 per host, default: 5)")
-    search_parser_advanced.add_argument("-mp", "--max-depth", default="7", help="Max folder depth to search for KeePass local install (default: 7)")
+    search_parser_advanced.add_argument("-th", "--threads", type=int, default="5", help="Number of threads to use during remote search (1 per host, default: 5)") # type to int and remove type
+    search_parser_advanced.add_argument("-ti", "--timeout", type=int, default="2", help='How many seconds to wait before giving up SMB connection (default: 2)')
+    search_parser_advanced.add_argument("-mp", "--max-depth", type=int, default="7", help="Max folder depth to search for KeePass local install (default: 7)")
 
     # trigger subparser
     trigger_parser = argparse.ArgumentParser(add_help=False)
@@ -129,13 +130,12 @@ def parse_args():
     plugin_poll_parser_poll.add_argument("-si", "--single", action='store_true', help='Only poll for the cleartext export once')
     plugin_poll_parser_poll.add_argument("-pp", "--poll-path", default=None, help="Custom path to look for an exported database, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search for %%APPDATA%%\\export.xml)")
 
-
     # parse_dump subparser
     parse_dump_parser = argparse.ArgumentParser(add_help=False)
     parse_dump_parser.add_argument("-d", "--dump_file", default=None, help="Path of the memory dump to parse")
     parse_dump_parser.add_argument("-b", "--bruteforce", default=None, help="Database to bruteforce")
 
-    #convert subparser
+    # convert subparser
     convert_parser = argparse.ArgumentParser(add_help=False)
     convert_parser.add_argument("-d", "--database_path", default=None, help="Path of the KDBX database to convert")
     convert_parser.add_argument("-t", "--hash_type", default='hashcat', help="Output hash type : 'hashcat' (default) or 'john'")
@@ -225,6 +225,7 @@ def parse_args():
 
     return options
 
+
 def parse_mandatory_options(options):
     # check for mandatory options
     if (options.mode == 'search' and not (options.target or options.targets_file)):
@@ -291,25 +292,6 @@ def parse_mandatory_options(options):
 
     return targets, share, domain, user, password, lm_hash, nt_hash
 
-
-def parse_search_integers(options):
-    threads = None
-    max_depth = None
-    if options.threads:
-        try:
-            threads = int(options.threads)
-        except ValueError:
-            print_error("Please specify a valid number of threads")
-            exit()
-
-    if options.max_depth:
-        try:
-            max_depth = int(options.max_depth)
-        except ValueError:
-            print_error("Please specify a valid number of folder recursion depth")
-            exit()
-
-    return threads, max_depth
 
 def parse_remote_path(remote_path):
     if remote_path.startswith('\\\\') and '$' in remote_path:
