@@ -22,6 +22,7 @@ def search(options):
     threads, max_depth = parse_search_integers(options)
     get_process = options.get_process
     output = options.output
+    found_only = options.found_only
 
     if output:
         try:
@@ -36,11 +37,11 @@ def search(options):
             exit(1)
 
     if len(targets) == 1:
-        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output)
+        search_target(targets[0], share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output, found_only)
     else:
-        print_info("Starting remote KeePass search with {} threads".format(threads))
+        print_info("Starting remote KeePass search with {} threads\n".format(threads))
         with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output))
+            executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output), repeat(found_only))
 
     if output:
         print('')
@@ -49,7 +50,8 @@ def search(options):
         else:
             print_error("Error writing results to {}".format(output))
 
-def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output):
+
+def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output, found_only):
     keepass_exe, version, keepass_processes, keepass_pid, keepass_user = None, None, None, None, None
 
     # admin connection to target
@@ -86,19 +88,21 @@ def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_d
     for config_file in config_files:
         print_success_target(target, "Found " + colored(('\'\\\\' + share + config_file + "'"), "blue"))
 
-    for keepass_process in keepass_processes:
-        keepass_process_name, keepass_pid, keepass_user  = keepass_process
-        message = get_process_display(share, keepass_process_name, keepass_user, keepass_pid)
-        print_success_target(target, message)
+    if keepass_processes:
+        for keepass_process in keepass_processes:
+            keepass_process_name, keepass_pid, keepass_user  = keepass_process
+            message = get_process_display(share, keepass_process_name, keepass_user, keepass_pid)
+            print_success_target(target, message)
 
-    if get_process and (keepass_exe or config_files) and not keepass_processes:
-        # if process is not running, only displays message if keepass-related files were found on the target (to prevent flooding output)
-        print_info_target(target, "No running KeePass process found")
+    if not found_only:
+        if get_process and (keepass_exe or config_files) and not keepass_processes:
+            # if process is not running, only displays message if keepass-related files were found on the target (to prevent flooding output)
+            print_info_target(target, "No running KeePass process found")
 
-    if get_process and not (keepass_exe or config_files or keepass_processes):
-        print_debug_target(target, "No KeePass-related file or process found")
-    elif not (keepass_exe or config_files):
-        print_debug_target(target, "No KeePass-related file found")
+        if get_process and not (keepass_exe or config_files or keepass_processes):
+            print_debug_target(target, "No KeePass-related file or process found")
+        elif not (keepass_exe or config_files):
+            print_debug_target(target, "No KeePass-related file found")
 
     if output:
         write_output(output, share, target, keepass_exe, version, last_update_time, config_files, get_process, keepass_processes)

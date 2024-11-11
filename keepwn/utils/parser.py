@@ -26,6 +26,7 @@ def parse_args():
     search_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     search_parser_advanced = search_parser.add_argument_group("Advanced Configuration")
     search_parser_advanced.add_argument("-gp", "--get-process", action='store_true', help='Checks if KeePass process is running on the target using RPC')
+    search_parser_advanced.add_argument("-fo", "--found-only", action='store_true', help='Only displays information about hosts where KeePass is found')
     search_parser_advanced.add_argument("-o", "--output", default=None, help='Output file to store results in CSV format')
     search_parser_advanced.add_argument("-th", "--threads", default="5", help="Number of threads to use during remote search (1 per host, default: 5)")
     search_parser_advanced.add_argument("-mp", "--max-depth", default="7", help="Max folder depth to search for KeePass local install (default: 7)")
