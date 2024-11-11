@@ -6,7 +6,7 @@ import sys
 
 from keepwn.utils.logging import print_error
 
-VERSION = "0.4"
+VERSION = "0.5"
 BANNER = "KeePwn v{} - by Julien BEDEL (@d3lb3_)".format(VERSION)
 
 
