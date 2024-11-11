@@ -11,7 +11,7 @@ from lxml import etree
 from termcolor import colored
 
 from keepwn.core.trigger import read_config_file
-from keepwn.utils.logging import print_info_target, print_debug_target, format_path, print_success_target, print_info, display_smb_error
+from keepwn.utils.logging import print_info_target, print_debug_target, format_path, print_success_target, print_info, print_error, print_success, display_smb_error
 from keepwn.utils.parser import parse_mandatory_options, parse_search_integers
 from keepwn.utils.smb import smb_connect
 from keepwn.utils.tstools import TSHandler
@@ -43,10 +43,11 @@ def search(options):
             executor.map(search_target, targets, repeat(share), repeat(user), repeat(password), repeat(domain), repeat(lm_hash), repeat(nt_hash), repeat(max_depth), repeat(get_process), repeat(output))
 
     if output:
+        print('')
         if Path(output).exists():
-            print("\nSearch results logged to {}".format(output))
+            print_success("Search results logged to {}".format(output))
         else:
-            print("\nError writing results to {}".format(output))
+            print_error("Error writing results to {}".format(output))
 
 def search_target(target, share, user, password, domain, lm_hash, nt_hash, max_depth, get_process, output):
     keepass_exe, version, keepass_process, keepass_pid, keepass_user = None, None, None, None, None
