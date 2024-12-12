@@ -8,7 +8,7 @@ def convert(options):
     if not os.path.isfile(options.database_path):
         database_name = os.path.basename(options.database_path)
         print_error('{} file not found'.format(database_name))
-        exit()
+        exit(1)
 
     if options.hash_type == 'john':
         hash = process_database(options.database_path)
@@ -16,7 +16,7 @@ def convert(options):
         hash = process_database(options.database_path).split(':')[1]
     else:
         print_error("Incorrect hash type, please sepcify 'john' or 'hashcat'")
-        exit()
+        exit(1)
 
     if hash is not None:
         crack_hint = {'john': 'john --format=keepass', 'hashcat': 'hashcat -m 13400'}
@@ -29,4 +29,4 @@ def convert(options):
             print(hash)
     else:
         print_error('Unknown error during hash extraction')
-        exit()
+        exit(1)

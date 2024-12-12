@@ -232,15 +232,15 @@ def parse_mandatory_options(options):
     # check for mandatory options
     if (options.mode == 'search' and not (options.target or options.targets_file)):
         print_error('Missing target (use --help to list parameters)')
-        exit(0)
+        exit(1)
 
     if ((options.mode == 'trigger' or options.mode == 'plugin') and not options.target):
         print_error('Missing target (use --help to list parameters)')
-        exit(0)
+        exit(1)
 
     if not options.user or not (options.password or options.hashes):
         print_error('Missing credentials (use --help to list parameters)')
-        exit(0)
+        exit(1)
 
     # get common mandatory parameters from options
     targets = []
@@ -254,7 +254,7 @@ def parse_mandatory_options(options):
             f.close()
         else:
             print_error("Could not open targets file '{}'.".format(options.targets_file))
-            sys.exit(0)
+            exit(1)
 
     share = 'C$'
     domain = options.domain
@@ -281,7 +281,7 @@ def parse_mandatory_options(options):
                     targets_to_add.append(str(ip))
             except:
                 print_error('Error in target CIDR: {}'.format(target))
-                exit(0)
+                exit(1)
 
     for target in targets_to_remove:
         targets.remove(target)
@@ -290,7 +290,7 @@ def parse_mandatory_options(options):
 
     if not targets:
         print_error("No target specified, exiting")
-        exit()
+        exit(1)
 
     return targets, share, domain, user, password, lm_hash, nt_hash
 

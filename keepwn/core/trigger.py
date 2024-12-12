@@ -99,12 +99,12 @@ def get_config_file_path(smb_connection, share, config_path_parameter):
             return local_config_paths[0]
         elif len(local_config_paths) == 0:
             print_error("No local KeePass configurations found, you can specify a pass with --config if it is somewhere else")
-            exit()
+            exit(1)
         elif len(local_config_paths) >= 1:
             print_error("Multiple local KeePass configurations found, please use --config to specify one amongst the following:")
             for local_config_path in local_config_paths:
                 cprint("    '{}'".format(local_config_path), 'blue')
-            exit()
+            exit(0)
 
 
 def read_config_file(smb_connection, share, config_file_path):
@@ -182,11 +182,11 @@ def add_trigger(options):
         ans = input('> ')
         if ans.lower() not in ['y', 'yes', '']:
             print_success("Safety first, good choice :)")
-            exit()
+            exit(0)
     elif patched == True:
         print_error("Detected KeePass {} > 2.53, you should abuse plugins instead of triggers for passwords extraction, as various safety features were added.".format(version))
         print("    See https://github.com/d3lb3/KeeFarceReborn for more information on plugin abuse :)")
-        exit()
+        exit(1)
 
     if options.config_path:
         custom_config_path = parse_remote_path(options.config_path)
@@ -351,7 +351,7 @@ def poll_trigger(options):
                 print_error("{} not found on tharget".format(format_path('\\\\' + share + poll_path)))
             else:
                 print_error("%APPDATA%\export.xml not found on target".format(share))
-            exit()
+            exit(0)
 
     else:
         try:
@@ -367,7 +367,7 @@ def poll_trigger(options):
                                     else:
                                         print()
                                         print_error("Found a directory, are you sure that you specified an export file path?")
-                                        exit()
+                                        exit(1)
                             except SessionError as e:
                                 pass  # the file was not found
                         else:
@@ -385,7 +385,7 @@ def poll_trigger(options):
                     if not export_path:
                         sleep(5)
         except KeyboardInterrupt:
-            exit()
+            exit(0)
 
     export_path_basename = ntpath.basename(export_path)
     print_success("Found cleartext export {}".format(format_path('\\\\{}\\{}'.format(share, export_path))))
@@ -403,4 +403,4 @@ def poll_trigger(options):
         print_success("Moved remote export to {}".format('.' + os.sep + relative_path))
     except:
         print_error("Unkown error while getting export.")
-        exit()
+        exit(1)

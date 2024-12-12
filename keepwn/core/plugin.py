@@ -18,7 +18,7 @@ def get_plugin_folder_path(smb_connection, share, plugin_path):
             print_warning("Specified path does not look like a plugin path, do you want to use it [y/n]")
             ans = input('> ')
             if ans.lower() not in ['y', 'yes', '']:
-                exit()
+                exit(0)
     else:
         print_info("No path specified, searching in default locations..")
         plugin_path = '\\Program Files\\KeePass Password Safe 2\\Plugins\\'
@@ -94,11 +94,11 @@ def add_plugin(options):
 
     if options.plugin is None:
         print_error('Missing plugin file, specify one with --plugin')
-        exit()
+        exit(1)
 
     if not os.path.exists(options.plugin):
         print_error('The specified plugin file does not exist')
-        exit()
+        exit(1)
 
     if not (options.plugin.lower().endswith('dll') or options.plugin.lower().endswith('plgx')):
         print_warning("The specified file does not look like a plugin, do you want to use it anyway? [y/n]")
@@ -152,7 +152,7 @@ def add_plugin(options):
             print_error(str_error.split('(')[0])
         else:
             print_error('Unkown error while connecting to target: {}'.format(str_error))
-        exit()
+        exit(1)
 
     fh.close()
 
@@ -170,7 +170,7 @@ def add_plugin(options):
 def clean_plugin(options):
     if options.plugin is None:
         print_error('Missing plugin file, specify one with --plugin')
-        exit()
+        exit(1)
 
     targets, share, domain, user, password, lm_hash, nt_hash = parse_mandatory_options(options)
     target = targets[0]
@@ -201,7 +201,7 @@ def clean_plugin(options):
 
     if not found_plugin:
         print_warning("Plugin not found in KeePass Plugin directory, aborting deletion".format(plugin_file))
-        exit()
+        exit(1)
 
     try:
         smb_connection.deleteFile(share, ntpath.join(plugin_folder_path, plugin_file))
@@ -276,7 +276,7 @@ def poll_plugin(options):
                 print_error("{} not found on tharget".format(format_path('\\\\' + share + poll_path)))
             else:
                 print_error("%APPDATA%\export.xml not found on target".format(share))
-            exit()
+            exit(0)
 
     else:
         try:
@@ -292,7 +292,7 @@ def poll_plugin(options):
                                     else:
                                         print()
                                         print_error("Found a directory, are you sure that you specified an export file path?")
-                                        exit()
+                                        exit(1)
                             except SessionError as e:
                                 pass  # the file was not found
                         else:
@@ -310,7 +310,7 @@ def poll_plugin(options):
                     if not export_path:
                         sleep(5)
         except KeyboardInterrupt:
-            exit()
+            exit(0)
 
     export_path_basename = ntpath.basename(export_path)
     print_success("Found cleartext export {}".format(format_path('\\\\{}\\{}'.format(share, export_path))))
@@ -328,4 +328,4 @@ def poll_plugin(options):
         print_success("Moved remote export to {}".format('.' + os.sep + relative_path))
     except:
         print_error("Unkown error while getting export.")
-        exit()
+        exit(1)

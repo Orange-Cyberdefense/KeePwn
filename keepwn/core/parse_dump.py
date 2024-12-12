@@ -53,11 +53,11 @@ def parse_dump(options):
 
     if options.dump_file is None:
         print_error('Missing dump file, specify one with --dump_file')
-        exit()
+        exit(1)
 
     if not os.path.exists(options.dump_file):
         print_error('The specified dump file does not exist')
-        exit()
+        exit(1)
 
     dump_file_path = options.dump_file
 
@@ -73,7 +73,7 @@ def parse_dump(options):
 
     if len(candidates) == 0:
         print_error('No candidates in the password dump, maybe KeePass 2.54+ was used by the target ?')
-        exit()
+        exit(1)
 
     print_info('Found {} candidates:'.format(len(candidates)))
 
@@ -85,13 +85,13 @@ def parse_dump(options):
 
     if not options.bruteforce:
         print_warning('Note: the two first characters still need to be determined, you can use --bruteforce to test them against an specific KDBX file.')
-        exit()
+        exit(1)
 
     if exists(options.bruteforce):
         database_path = options.bruteforce
     else:
         print_error('The specified database does not exist')
-        exit()
+        exit(1)
 
     if not 'KDBX' in magic.from_file(database_path):
         print_warning("{} does not look like a KeePass database, do you want to use it? [y/n]".format(os.path.basename(database_path)))

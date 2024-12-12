@@ -29,7 +29,7 @@ def process_1x_database(data, databaseName, maxInlineSize=1024):
         algorithm = 1
     else:
         print_error("KDBX 1.x - Unsupported file encryption!")
-        exit()
+        exit(1)
 
     # TODO: keyfile processing
 
@@ -76,7 +76,7 @@ def process_2x_database(data, databaseName):
     if major_version == b'0400':
         print_error("KDBX 4.x is not supported yet, you may try https://github.com/r3nt0n/keepass4brute to find the database password")
         print('    If you are in the mood for a PR https://palant.info/2023/03/29/documenting-keepass-kdbx4-file-format should be a good read :)')
-        exit()
+        exit(1)
 
     while not endReached:
 
@@ -135,6 +135,6 @@ def process_database(filename):
         hash = process_1x_database(data, databaseName)
     else:
         print_error("No KDBX signature found in {}, are you sure this is a KeePass database?".format(base))
-        exit()
+        exit(1)
 
     return hash
