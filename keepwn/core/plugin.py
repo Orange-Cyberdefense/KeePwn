@@ -135,11 +135,9 @@ def add_plugin(options):
 
     if found_plugin:
         print_warning("Plugin already added to KeePass Plugin directory, do you want to overwrite? [y/n]".format(plugin_file))
-    else:
-        print_warning("About to add {} to KeePass Plugins directory, do you want to continue? [y/n]".format(plugin_file))
-    ans = input('> ')
-    if ans.lower() not in ['y', 'yes', '']:
-        exit(0)
+        ans = input('> ')
+        if ans.lower() not in ['y', 'yes', '']:
+            exit(0)
 
     fh = open(options.plugin, 'rb')
     try:
@@ -204,11 +202,6 @@ def clean_plugin(options):
     if not found_plugin:
         print_warning("Plugin not found in KeePass Plugin directory, aborting deletion".format(plugin_file))
         exit()
-    else:
-        print_warning("About to remove {} from KeePass Plugin directory, do you want to continue [y/n]".format(plugin_file))
-        ans = input('> ')
-        if ans.lower() not in ['y', 'yes', '']:
-            exit(0)
 
     try:
         smb_connection.deleteFile(share, ntpath.join(plugin_folder_path, plugin_file))
