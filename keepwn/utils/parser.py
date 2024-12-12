@@ -4,7 +4,8 @@ import os
 import re
 import sys
 
-from keepwn.utils.logging import print_error
+from keepwn.utils.kerberos import ExtendedCCache
+from keepwn.utils.logging import print_error, print_warning
 
 VERSION = "0.5"
 BANNER = "KeePwn v{} - by Julien BEDEL (@d3lb3_)".format(VERSION)
@@ -55,6 +56,7 @@ def parse_args():
     trigger_add_parser_auth.add_argument("-p", "--password", default=None, help='Password to authenticate to the remote machine')
     trigger_add_parser_auth.add_argument("-H", "--hashes", default=None, metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
     trigger_add_parser_advanced = trigger_add_parser.add_argument_group("Advanced Configuration")
+    trigger_add_parser_advanced.add_argument("-tp", "--trigger-path", default=None, help="Path of the local XML file containing a <Trigger> element to insert in the target's KeePass.config.xml")
     trigger_add_parser_advanced.add_argument("-c", "--config-path", default=None, help="Path of the remote KeePass configuration file, accepts both 'C:\\..' and '\\\\C$\\..' formats (if ommited, will search in default locations)")
     # trigger remove subparser
     trigger_remove_parser = argparse.ArgumentParser(add_help=False)
