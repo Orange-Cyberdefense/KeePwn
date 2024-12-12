@@ -11,7 +11,7 @@ from impacket.smbconnection import SessionError
 from termcolor import cprint, colored
 
 from keepwn.utils.logging import print_error, print_info, print_success, Loader, format_path, print_warning, \
-    display_smb_error
+    display_smb_error, print_error_target
 from keepwn.utils.parser import parse_mandatory_options, parse_remote_path
 from keepwn.utils.smb import smb_connect
 from packaging.version import Version
@@ -116,15 +116,16 @@ def read_config_file(smb_connection, share, config_file_path):
     output = fh.getvalue()
     encoding = chardet.detect(output)['encoding']
     error_msg = "KeePass.config.xml cannot be correctly decoded, are you sure that the text is readable?"
+    config_file_content = ""
     if encoding:
         try:
             config_file_content = output.decode(encoding)
         except:
-            print(error_msg)
+            print_error_target(error_msg)
         finally:
             fh.close()
     else:
-        print_error(error_msg)
+        print_error_target(error_msg)
 
     return config_file_content
 
