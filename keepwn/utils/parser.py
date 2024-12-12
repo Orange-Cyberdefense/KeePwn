@@ -4,7 +4,6 @@ import os
 import re
 import sys
 
-from keepwn.utils.kerberos import ExtendedCCache
 from keepwn.utils.logging import print_error, print_warning
 
 VERSION = "0.5"
